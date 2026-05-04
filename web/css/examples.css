@@ -1,0 +1,49 @@
+/**
+ * \file      (WaTE) web/css/examples.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   2.1.0
+ * \brief     Styles de la page /examples — hero + légende seulement.
+ *
+ * \details   Les blocs exemple, le code et les aperçus sont encapsulés
+ *            dans le shadow DOM de <wate-example> (web/custom/wate-example/).
+ */
+
+/* ── En-tête de la page ────────────────────────────────────────────── */
+.examples-hero {
+  padding: clamp(2em, 5vw, 3em) 0 1.5em;
+  text-align: center;
+}
+.examples-heading {
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4em;
+}
+.examples-intro {
+  max-width: 42em;
+  margin: 0 auto;
+  color: var(--text-muted);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+}
+
+/* ── Légende du pipeline (hero) ────────────────────────────────────── */
+.examples-legend {
+  margin: 2em auto 0;
+  padding: 1.4em clamp(1em, 3vw, 1.8em);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+.examples-legend-text {
+  margin: 1em 0 0;
+  color: var(--text-muted);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+/* (WaTE) web/css/examples.css v2.1.0 */

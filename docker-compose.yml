@@ -1,0 +1,16 @@
+services:
+  wate-engine:
+    build: .
+    container_name: wate_app
+    restart: always
+    ports:
+      - "8080:3011"
+    volumes:
+      # FIX v3.19.4 #49: dossier entier (WAL -wal/-shm inclus, évite corruption)
+      - ./data:/usr/src/app/data
+      # Uploads (multer)
+      - ./store:/usr/src/app/store
+    environment:
+      - NODE_ENV=production
+      # FIX v3.19.4 #57: secret CSRF persisté (sinon rotation à chaque restart → 403)
+      - WATE_CSRF_SECRET=${WATE_CSRF_SECRET:-change-me-in-production}

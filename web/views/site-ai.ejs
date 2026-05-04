@@ -1,0 +1,82 @@
+<%
+/**
+ * \file      (WaTE) web/views/site-ai.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   1.0.0
+ * \brief     Fragment page /ai — WaTE + Intelligence Artificielle.
+ */
+%>
+<section class="ai-hero">
+  <h1 class="ai-hero-title"><%=_gi(result, 'ai-hero-title')%></h1>
+  <p class="ai-hero-subtitle"><%-_gi(result, 'ai-hero-subtitle')%></p>
+</section>
+
+<section class="ai-arguments">
+  <div class="ai-arg">
+    <h2 class="ai-arg-h"><%=_gi(result, 'ai-arg1-h')%></h2>
+    <p class="ai-arg-p"><%=_gi(result, 'ai-arg1-p')%></p>
+  </div>
+  <div class="ai-arg">
+    <h2 class="ai-arg-h"><%=_gi(result, 'ai-arg2-h')%></h2>
+    <p class="ai-arg-p"><%=_gi(result, 'ai-arg2-p')%></p>
+  </div>
+  <div class="ai-arg">
+    <h2 class="ai-arg-h"><%=_gi(result, 'ai-arg3-h')%></h2>
+    <p class="ai-arg-p"><%=_gi(result, 'ai-arg3-p')%></p>
+  </div>
+  <div class="ai-arg">
+    <h2 class="ai-arg-h"><%=_gi(result, 'ai-arg4-h')%></h2>
+    <p class="ai-arg-p"><%=_gi(result, 'ai-arg4-p')%></p>
+  </div>
+</section>
+
+<section class="ai-prompts">
+  <h2 class="ai-prompts-title"><%=_gi(result, 'ai-prompts-title')%></h2>
+
+  <details class="ai-prompt">
+    <summary class="ai-prompt-summary"><span><%=_gi(result, 'ai-prompt1-label')%></span><button class="copy-btn" title="<%=_gi(result,'copy-btn')%>"></button></summary>
+    <pre class="ai-prompt-text"><%=_gi(result, 'ai-prompt1')%></pre>
+  </details>
+
+  <details class="ai-prompt">
+    <summary class="ai-prompt-summary"><span><%=_gi(result, 'ai-prompt2-label')%></span><button class="copy-btn" title="<%=_gi(result,'copy-btn')%>"></button></summary>
+    <pre class="ai-prompt-text"><%=_gi(result, 'ai-prompt2')%></pre>
+  </details>
+
+  <details class="ai-prompt">
+    <summary class="ai-prompt-summary"><span><%=_gi(result, 'ai-prompt3-label')%></span><button class="copy-btn" title="<%=_gi(result,'copy-btn')%>"></button></summary>
+    <pre class="ai-prompt-text"><%=_gi(result, 'ai-prompt3')%></pre>
+  </details>
+
+  <details class="ai-prompt">
+    <summary class="ai-prompt-summary"><span><%=_gi(result, 'ai-prompt4-label')%></span><button class="copy-btn" title="<%=_gi(result,'copy-btn')%>"></button></summary>
+    <pre class="ai-prompt-text"><%=_gi(result, 'ai-prompt4')%></pre>
+  </details>
+
+  <details class="ai-prompt">
+    <summary class="ai-prompt-summary"><span><%=_gi(result, 'ai-prompt5-label')%></span><button class="copy-btn" title="<%=_gi(result,'copy-btn')%>"></button></summary>
+    <pre class="ai-prompt-text"><%=_gi(result, 'ai-prompt5')%></pre>
+  </details>
+</section>
+
+<p class="ai-conclusion"><%=_gi(result, 'ai-conclusion')%></p>
+
+<!-- FIX v1.0.2 #153: nonce CSP -->
+<script<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+document.querySelectorAll('.ai-prompt .copy-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault()
+    const pre = btn.closest('details').querySelector('pre')
+    if(!pre) return
+    // FIX v1.0.2 #154: .catch() sur clipboard (HTTP/contexte non sécurisé)
+    navigator.clipboard.writeText(pre.textContent).then(() => {
+      btn.classList.add('copied')
+      setTimeout(() => { btn.classList.remove('copied') }, 1500)
+    }).catch(() => {})
+  })
+})
+</script>
+
+<%# (WaTE) web/views/site-ai.ejs v1.0.1 %>

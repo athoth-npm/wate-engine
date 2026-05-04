@@ -1,0 +1,139 @@
+/**
+ * \file      (WaTE) web/custom/wate-stack/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-25
+ * \version   1.0.0
+ * \brief     Styles shadow DOM des custom elements <wate-stack> et <wate-stack-box>.
+ *
+ * \details   Une seule feuille pour les deux éléments — les sélecteurs .stack et .box
+ *            les distinguent. Variables CSS regroupées sur :host pour permettre la
+ *            surcharge éventuelle par l'application hôte (les variables traversent
+ *            la frontière shadow).
+ *
+ *            Trois tons :
+ *              navy   — couches « cœur » : fond marine, texte blanc, accent orange.
+ *              orange — couche « moteur » mise en évidence : fond crème, bordure orange.
+ *              muted  — couches « périphériques » (client, externe) : bordure pointillée.
+ */
+
+:host {
+  display: block;
+  --ws-navy:   #002147;
+  --ws-orange: #f0a500;
+  --ws-cream:  #fff4dc;
+  --ws-text:   #ffffff;
+  --ws-text-d: #c8ddf0;
+  --ws-muted:  #5a6a7e;
+  --ws-bg:     #ffffff;
+  --ws-border: var(--border);
+}
+
+/* ── <wate-stack> ─────────────────────────────────────────────────── */
+.stack {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.stack-title {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ws-muted);
+  padding: 0 0.2em;
+}
+.stack-title:empty {
+  display: none;
+}
+
+.stack-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+.stack[data-orientation="horizontal"] .stack-inner {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.8em;
+}
+.stack[data-orientation="horizontal"] .stack-inner > ::slotted(wate-stack-box) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .stack[data-orientation="horizontal"] .stack-inner {
+    flex-direction: column;
+  }
+}
+
+/* ── <wate-stack-box> ─────────────────────────────────────────────── */
+:host(wate-stack-box) {
+  display: block;
+  height: 100%;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  padding: 0.9em 1.1em;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.box-label {
+  display: block;
+  font-size: 1.05em;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.box-sub {
+  display: block;
+  font-size: 0.85em;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.box-sub:empty {
+  display: none;
+}
+
+/* Tons */
+.box[data-tone="navy"] {
+  background: var(--ws-navy);
+  color: var(--ws-text);
+  border-left: 4px solid var(--ws-orange);
+  border-radius: 6px 10px 10px 6px;
+}
+.box[data-tone="navy"] .box-sub {
+  color: var(--ws-text-d);
+}
+
+.box[data-tone="orange"] {
+  background: var(--ws-cream);
+  color: var(--ws-navy);
+  border-color: var(--ws-orange);
+}
+.box[data-tone="orange"] .box-sub {
+  color: var(--ws-muted);
+}
+
+.box[data-tone="muted"] {
+  background: var(--ws-bg);
+  color: var(--ws-navy);
+  border: 2px dashed var(--ws-border);
+}
+.box[data-tone="muted"] .box-sub {
+  color: var(--ws-muted);
+}
+
+/* (WaTE) web/custom/wate-stack/def.css v1.0.0 */

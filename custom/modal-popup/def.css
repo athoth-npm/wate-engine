@@ -1,0 +1,224 @@
+/**
+ * \file      (WaTE) custom/modal-popup/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-25
+ * \version   1.3.1
+ * \brief     Style shadow DOM du custom element <modal-popup>.
+ *
+ * \details   Toute la charte est exposée en CSS custom properties --mp-*.
+ *            Les custom props traversent le shadow DOM, donc un appelant peut
+ *            rethémer entièrement via :
+ *              modal-popup { --mp-bg:#fff; --mp-border-color:#f0a500; ... }
+ *            Les valeurs par défaut reproduisent la charte admin (marine + orange).
+ *
+ * \details   ── CONTRAT DE THÈME ───────────────────────────────────────────────
+ *            Toute couleur, ombre, radius, padding, font-size visible est pilotée.
+ *            Les littéraux structurels (positionnement, animations, gaps) sont
+ *            volontairement figés — voir « non surchargeables » plus bas.
+ *
+ *  Variable                      | Rôle                          | Défaut
+ *  ------------------------------|-------------------------------|------------------------
+ *  --mp-bg                       | Fond popup                    | #002147
+ *  --mp-color                    | Couleur texte body            | #c8ddf0
+ *  --mp-border-color             | Couleur bordure popup         | #f0a500
+ *  --mp-border-width             | Épaisseur bordure             | 2px
+ *  --mp-border-style             | Style bordure                 | solid
+ *  --mp-border-top               | Bordure haute (override seul) | hérite des 3 ci-dessus  (v1.3.0)
+ *  --mp-radius                   | Border-radius popup           | 8px
+ *  --mp-padding                  | Padding popup                 | 1.2em 1.8em
+ *  --mp-shadow                   | box-shadow popup              | none
+ *  --mp-backdrop                 | Couleur overlay backdrop      | rgba(0,20,40,.55)
+ *  --mp-title-color              | Couleur titre                 | #f0a500
+ *  --mp-title-size               | Taille titre                  | 1.167rem
+ *  --mp-rule-color               | Trait séparateur header       | #f0a500
+ *  --mp-icon-display             | Affichage logo header         | block
+ *  --mp-icon-src                 | URL logo (background-image)   | url('/images/WaTE-Logo-White.png')
+ *  --mp-icon-size                | Taille logo (carré)           | 48px
+ *  --mp-link-color               | Couleur liens body            | #f0a500
+ *  --mp-link-hover               | Couleur liens body hover      | #ffd060
+ *  --mp-btn-radius               | Border-radius boutons         | 4px
+ *  --mp-btn-padding              | Padding boutons               | 5px 16px
+ *  --mp-btn-shadow               | box-shadow boutons            | none
+ *  --mp-btn-ok-bg                | Fond bouton OK                | linear-gradient(#f0b030,#c88000)
+ *  --mp-btn-ok-bg-hover          | Fond bouton OK hover          | linear-gradient(#ffd060,#e09010)
+ *  --mp-btn-ok-color             | Couleur texte bouton OK       | #001633
+ *  --mp-btn-cancel-bg            | Fond bouton Annuler           | linear-gradient(#e8e8e8,#c0c0c0)
+ *  --mp-btn-cancel-bg-hover      | Fond bouton Annuler hover     | linear-gradient(#d8d8d8,#b0b0b0)
+ *  --mp-btn-cancel-color         | Couleur texte bouton Annuler  | #222
+ *
+ *            ── NON SURCHARGEABLES (structure, pas charte) ─────────────────────
+ *            - :host { position:fixed; inset:0; z-index:1000 }   — overlay full-page
+ *            - .backdrop animation: fade 0.15s ease-out          — apparition
+ *            - .popup min-width:320px; max-width:560px            — limites lisibles
+ *            - .popup display:flex; flex-direction:column; gap:0.8em — squelette
+ *            - .icon::after (« ? » sur mode=confirm) couleur fixe #001633
+ *
+ * \details   ── CHANGELOG ──────────────────────────────────────────────────────
+ *            v1.1.0 : rendu plus plat, bordures boutons supprimées, positionnement
+ *                     inline dans def.js pour éviter le FOUC.
+ *            v1.2.0 : contrat de thème via 25 custom props --mp-*.
+ *            v1.3.0 : ajout --mp-border-top (liseré supplémentaire optionnel),
+ *                     header de doc enrichi (tableau exhaustif + non surchargeables).
+ *            v1.3.1 : dégradés boutons passés en valeurs fixes (suppression des
+ *                     références aux variables --btn-* externes).
+ */
+
+:host {
+  /* ── Charte surchargeable ──────────────────────────────────────────── */
+  --mp-bg:               #002147;
+  --mp-border-color:     #f0a500;
+  --mp-border-width:     2px;
+  --mp-border-style:     solid;
+  /* --mp-border-top : par défaut hérite des trois ci-dessus (bordure uniforme).
+     Surchargeable seul pour un liseré différencié (ex: "4px solid #f0a500"
+     avec bordures latérales/basse à none — voir web/css/common.css). */
+  --mp-border-top:       var(--mp-border-width) var(--mp-border-style) var(--mp-border-color);
+  --mp-radius:           8px;
+  --mp-padding:          1.2em 1.8em;
+  --mp-color:            #c8ddf0;
+  --mp-title-color:      #f0a500;
+  --mp-title-size:       1.167rem;
+  --mp-rule-color:       #f0a500;
+  --mp-backdrop:         rgba(0, 20, 40, 0.55);
+  --mp-shadow:           none;
+
+  --mp-icon-size:        48px;
+  --mp-icon-display:     block;
+
+  --mp-btn-radius:       4px;
+  --mp-btn-padding:      5px 16px;
+  --mp-btn-shadow:       none;
+
+  --mp-btn-ok-bg:        linear-gradient(to bottom, #f0b030, #c88000);
+  --mp-btn-ok-bg-hover:  linear-gradient(to bottom, #ffd060, #e09010);
+  --mp-btn-ok-color:     #001633;
+
+  --mp-btn-cancel-bg:       linear-gradient(to bottom, #e8e8e8, #c0c0c0);
+  --mp-btn-cancel-bg-hover: linear-gradient(to bottom, #d8d8d8, #b0b0b0);
+  --mp-btn-cancel-color:    #222;
+
+  --mp-link-color:       #f0a500;
+  --mp-link-hover:       #ffd060;
+
+  /* ── Positionnement (non surchargeable) ───────────────────────────── */
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: block;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--mp-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade 0.15s ease-out;
+}
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.popup {
+  background: var(--mp-bg);
+  border: var(--mp-border-width) var(--mp-border-style) var(--mp-border-color);
+  border-top: var(--mp-border-top);
+  border-radius: var(--mp-radius);
+  padding: var(--mp-padding);
+  min-width: 320px;
+  max-width: 560px;
+  color: var(--mp-color);
+  box-shadow: var(--mp-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  border-bottom: 1px solid var(--mp-rule-color);
+  padding-bottom: 0.6em;
+}
+
+.icon {
+  position: relative;
+  flex: 0 0 var(--mp-icon-size);
+  width: var(--mp-icon-size);
+  height: var(--mp-icon-size);
+  display: var(--mp-icon-display);
+  background-image: var(--mp-icon-src, url('/images/WaTE-Logo-White.png'));
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+:host([mode=confirm]) .icon::after {
+  content: '?';
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mp-border-color);
+  color: #001633;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--mp-title-size);
+  color: var(--mp-title-color);
+  flex: 1;
+}
+
+.body {
+  font-size: 0.917rem;
+  line-height: 1.4;
+}
+
+.body p       { margin: 0.4em 0; }
+.body ul      { margin: 0.4em 0; padding-left: 1.4em; }
+.body li      { margin: 0.2em 0; }
+/* FIX v1.3.3 #111: règles .body a inefficaces sur slot — retirées (code mort) */
+
+.actions {
+  display: flex;
+  gap: 0.6em;
+  justify-content: flex-end;
+  margin-top: 0.4em;
+}
+
+:host([mode=info]) .btn-cancel,
+:host([mode=about]) .btn-cancel { display: none; }
+
+.actions button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--mp-btn-radius);
+  padding: var(--mp-btn-padding);
+  background: var(--mp-btn-cancel-bg);
+  color: var(--mp-btn-cancel-color);
+  font-size: 0.833rem;
+  font-weight: bold;
+  box-shadow: var(--mp-btn-shadow);
+}
+
+.actions .btn-ok {
+  background: var(--mp-btn-ok-bg);
+  color: var(--mp-btn-ok-color);
+}
+
+.actions button:hover         { background: var(--mp-btn-cancel-bg-hover); }
+.actions .btn-ok:hover        { background: var(--mp-btn-ok-bg-hover); }
+.actions button:active        { transform: translateY(1px); }
+.actions button:focus-visible { outline: 2px solid var(--mp-border-color); outline-offset: 2px; }
+
+/* (WaTE) custom/modal-popup/def.css v1.3.3 */

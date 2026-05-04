@@ -1,0 +1,115 @@
+<%
+/**
+ * \file      (WaTE) web/views/common.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.4.2
+ * \brief     Layout maître du site vitrine WaTE — charte publique.
+ *
+ * \details   Trouvé prioritairement par Express (cwd/web/views/ passe avant
+ *            engine/views/). Ne remplace pas le common.ejs admin — chaque
+ *            app a son layout.
+ *
+ *            Variables utiles :
+ *              elements.template — fragment EJS à inclure dans <main>.
+ *              elements.css      — CSS de page (optionnel).
+ *              elements.title    — tag glossaire pour le <title> (optionnel).
+ *
+ *            Header : <icon-menu class="site-burger"> pour le menu de navigation
+ *            principal et <icon-menu class="site-lang"> pour le sélecteur de langue.
+ *            Les deux fonctionnent à l'identique — hover ouvre, clic suit le lien.
+ *
+ *            v1.1.0 : sélecteur de langue <icon-menu> dans le header — drapeau
+ *                     de la langue courante en bouton, autres langues dans le
+ *                     menu déroulant. Drapeaux servis depuis engine/images/.
+ *            v1.2.0 : popup « À propos » entièrement i18n — tous les textes
+ *                     viennent de _glossary (clés site-about-*, list_id NULL).
+ *                     Plus de hard-codage français.
+ *            v1.3.0 : burger migré vers <icon-menu class="site-burger"> — même
+ *                     composant que le sélecteur de langue, plus de <details>
+ *                     natif. Cohérence parfaite des deux menus déroulants.
+ *            v1.4.0 : entrée « Démo live » du burger pointe désormais sur /demo
+ *                     (la nouvelle rubrique démo gestion de stock) au lieu de
+ *                     l'ancien shop.wate.fr externe.
+ *            v1.4.2 : about modal unifié avec l'admin (about-version,
+ *                     about-copy, about-intro).
+ */
+var _gi     = glossaryItem
+var scripts = elements.scripts ? JSON.parse('[' + elements.scripts + ']') : []
+var _menu   = EJSs['site-menu']
+var qs       = _menu.queryStr(req)
+var langItems = _menu.langItems(req, result, _gi)
+var navItems  = _menu.navItems(req, result, _gi)
+%>
+<!DOCTYPE html>
+<html lang="<%=lang%>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= CSRFToken %>">
+  <script src="/scripts/csrf.js" defer></script>
+  <script src="/scripts/btn-action.js" defer></script>
+  <title>WaTE<% if(elements.title) { %> — <%=_gi(result, elements.title)%><% } %></title>
+  <link rel="stylesheet" href="/css/common.css">
+  <% if(elements.css && elements.css !== 'common.css') { %>
+  <link rel="stylesheet" href="/css/<%=elements.css%>">
+  <% } %>
+  <script type="module" src="/custom/custom.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <script type="module" src="/custom/icon-menu/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <script type="module" src="/custom/demo-code-block/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <% for(var s of scripts) { %>
+  <script type="<%=s.type%>" src="<%=s.path%>"<% if(s.options) { %> <%=s.options%><% } %>></script>
+  <% } %>
+</head>
+<body>
+  <header class="site-header">
+    <button type="button" class="site-brand" id="site-about-trigger">
+      <span class="site-brand-mark">WaTE</span>
+      <span class="site-brand-sub">Web as Table Engine</span>
+    </button>
+    <template id="site-about-tpl">
+      <p class="about-version"><strong>WaTE <%=_gi(result, 'wate-version')%></strong></p>
+      <p class="about-copy"><%=_gi(result, 'wate-copyright')%></p>
+      <p class="about-intro"><%-_gi(result, 'site-about-product')%></p>
+      <p><%-_gi(result, 'site-about-tagline')%></p>
+      <ul>
+        <li><%=_gi(result, 'site-about-author')%> : Romain Légault</li>
+        <li><%=_gi(result, 'site-about-contact')%> : <a href="mailto:rlegault@wate.fr">rlegault@wate.fr</a></li>
+        <li><%=_gi(result, 'site-about-repo')%> : <a href="https://github.com/athoth-npm/wate-engine" target="_blank" rel="noopener">github.com/athoth-npm/wate-engine</a></li>
+        <li><%=_gi(result, 'site-about-website')%> : <a href="https://www.wate.fr" target="_blank" rel="noopener">www.wate.fr</a></li>
+        <li><%=_gi(result, 'site-about-license')%> : <%=_gi(result, 'site-about-license-v')%></li>
+      </ul>
+    </template>
+    <script type="module"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+      import '/custom/modal-popup/def.js'
+      document.getElementById('site-about-trigger').addEventListener('click', function() {
+        window.wateModal.about({
+          title: <%- JSON.stringify(_gi(result, 'site-about-title')) %>,
+          html:  document.getElementById('site-about-tpl').innerHTML
+        })
+      })
+    </script>
+    <form class="site-search" autocomplete="off">
+      <input type="search" id="site-search-input" aria-label="<%= lang === 'en' ? 'Search documentation' : 'Rechercher dans la documentation' %>" placeholder="<%= lang === 'en' ? 'Search docs…' : 'Rechercher…' %>">
+      <div class="site-search-results" id="site-search-results"></div>
+    </form>
+    <div class="site-header-right">
+      <icon-menu class="site-burger" icon="/images/hamburger.svg" items="<%=navItems%>" href="<%=req.path%><%=qs%>"></icon-menu>
+      <icon-menu class="site-lang"   icon="/images/<%=lang%>.png" items="<%=langItems%>"></icon-menu>
+    </div>
+  </header>
+
+  <main class="site-main">
+<% if(elements.template) { %>
+    <% var tpl = elements.template || ''; if(/^[a-zA-Z0-9_-]+$/.test(tpl)) { %><%- include('./' + tpl + '.ejs', {_gi}) %><% } %>
+<% } %>
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer-tagline"><%=_gi(result, 'site-footer-tagline')%></p>
+    <p class="site-footer-copy">&copy; 2023-2026 <a href="mailto:rlegault@wate.fr">Romain Légault</a></p>
+  </footer>
+</body>
+</html>
+<%# (WaTE) web/views/common.ejs v1.4.2 %>

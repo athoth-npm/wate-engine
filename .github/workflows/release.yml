@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Patch sqlite3 for Node 18+
+        run: |
+          sed -i 's/"sqlite3": "4.0.0"/"sqlite3": "5.1.7"/' package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run test suite
+        run: |
+          node test/app.js &
+          for i in $(seq 1 20); do
+            curl -s http://localhost:3001/health > /dev/null && break
+            sleep 0.5
+          done
+          bash test/test-wate.sh
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          sed -n "/## \[v$VERSION\]/,/^## \[/p" CHANGELOG.md | sed '$d' > release-body.md
+          cat release-body.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.changelog.outputs.version }} — WaTE Engine
+          body_path: release-body.md
+          draft: false
+          prerelease: false

@@ -1,0 +1,248 @@
+<%
+/**
+ * \file      (WaTE) admin-auth.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   8.4.1
+ * \brief     Vue auth admin — formulaire générique piloté par PRAGMA + enrichissement DB.
+ *
+ * \details   Surchargeable : placer views/admin-auth.ejs dans app/views/.
+ *            admin-auth.css surchargeable : placer css/admin-auth.css dans app/css/.
+ *
+ *            Architecture unifiée avec <admin-row> (admin-db.ejs) :
+ *              - columns   : PRAGMA table_info  → result['_columns'] (list 100).
+ *              - fkMap     : PRAGMA foreign_key_list → result['_fk'] (list 100).
+ *              - fkOptions : result['_fk_<table>'] (list 100 pour _fk_lang, etc.).
+ *              - fieldsMap : enrichissement depuis elements['fields'] (_item).
+ *                            Si absent → toutes les colonnes affichées (mode générique).
+ *              - mandatory : field.mandatory si défini, sinon col.notnull && !pk.
+ *              - type HTML : field.type (email/password/text/select) ou 'text' par défaut.
+ *              - tag label : field.tag || col.name.
+ *              - readonly  : col.pk && existingRecord (dérivé du PRAGMA, pas de flag).
+ *              - password_confirm : champ virtuel injecté après 'password' si présent
+ *                                   dans elements['fields'] (non mappé à une colonne DB).
+ *
+ *            v8.0.0 : migration vers <admin-row mode="form" action="..." fields="...">.
+ *                     authFields construit en EJS (serveur) — labels, types, values, items FK,
+ *                     hash:sha256, confirm:field, submit, lien "other".
+ *                     Suppression : customHTMLElement.create inline, adminFormBind,
+ *                     include admin-list.ejs, fkColumns, <div class="auth-panel">,
+ *                     bouton submit light DOM. Le panel border est sur :host([mode=form])
+ *                     dans custom/admin-row/def.css. SHA256 + confirm gérés par def.js.
+ *            v8.1.0 : lien "other" mode="me" → DELETE /admin/api/auth/me avec
+ *                     window.confirm() (admin-row/def.js v1.1.0). Résout la boucle 401
+ *                     (next-me-other='signup' inaccessible à l'owner).
+ *            v8.2.0 : modes "forgot" et "reset" supportés (_list 6 et 7).
+ *                     - forgot : formulaire email → /admin/form/auth/forgot.
+ *                     - reset  : formulaire password + confirm → /admin/form/auth/reset?token=…
+ *                       (token injecté comme champ hidden). Désactivé si app.locals.mailAvailable
+ *                       est false ou si le token est absent/vide.
+ *                     - signin : lien « Mot de passe oublié ? » affiché si mailAvailable
+ *                       (après le bouton submit, via un field {type:'link'}).
+ *                     - req.query.info (account-verified, forgot-sent, reset-done) rendu
+ *                       en <p class="info"> — pendant visible de req.query.error.
+ *            v8.3.0 : durcissement affichage req.query.error / req.query.info. Avant,
+ *                     un tag absent du glossaire était affiché brut (tag déduit côté
+ *                     serveur) — vecteur de phishing via ?error=appelez-le-0800-xxx.
+ *                     Maintenant, _RE_MSG (regex locale, parsée une fois) filtre la
+ *                     valeur sur [a-z][a-z0-9-]{0,63} ; si rejetée, aucun texte n'est
+ *                     rendu. Si acceptée mais absente du glossaire, _gi retourne le
+ *                     tag — inoffensif (kebab-case ASCII).
+ *            v8.3.1 : mailAvailable lit isAvailable comme propriété (booléen) et non
+ *                     plus comme méthode — cohérent avec _core.js v1.4.1.
+ *            v8.4.0 : formulaire de renvoi du lien de vérification
+ *                     quand ?error=account-not-verified.
+ */
+%>
+<%
+  // ── 0. Validation des tags de message portés par la query string ──────────
+  // v8.3.0 : ?error=… et ?info=… attendent un tag de glossaire (kebab-case ASCII,
+  // ≤ 64 chars). Toute autre valeur est ignorée — pas de rendu, pas de fuite.
+  // Parsée une seule fois par requête (hoisted, pas par itération).
+  const _RE_MSG = /^[a-zA-Z][a-zA-Z0-9-]{0,63}$/
+  var _msgTag = function(q) { return (typeof q === 'string' && _RE_MSG.test(q)) ? q : null }
+
+  // ── 1. Colonnes depuis PRAGMA (même pattern que admin-db.ejs) ──────────────
+  var _fkMap = {}
+  ;((result['_fk'] || {}).rows || []).forEach(function(fk) { _fkMap[fk.from] = fk.table })
+
+  var columns = ((result['_columns'] || {}).rows || []).map(function(c) {
+    return {name: c.name, pk: c.pk, notnull: c.notnull, dflt_value: c.dflt_value, fk: _fkMap[c.name] || null}
+  })
+
+  // ── 2. fkOptions depuis result['_fk_<table>'] (même pattern que admin-db.ejs) ──
+  var fkOptions = {}
+  ;((result['_fk'] || {}).rows || []).forEach(function(fk) {
+    if(fkOptions[fk.table]) return
+    fkOptions[fk.table] = {}
+    var resultKey = '_fk_' + fk.table.replace(/^_/, '')
+    ;((result[resultKey] || {}).rows || []).forEach(function(r) {
+      var keys = Object.keys(r)
+      if(!keys.length) return
+      var k = r[keys[0]], v = keys.length > 1 ? r[keys[1]] : k
+      fkOptions[fk.table][String(k)] = String(v == null ? k : v)
+    })
+  })
+
+  // ── 3. Enrichissement fields : filtre + labels + type HTML + mandatory override ──
+  // Si elements['fields'] absent → mode générique (toutes les colonnes).
+  var fieldsAll = !elements['fields']
+  var fieldsMap = {}
+  var confirmPasswordField = null
+  if(!fieldsAll) {
+    try {
+      JSON.parse('[' + elements['fields'] + ']').sort(function(a,b){return (a.order||0)-(b.order||0)}).forEach(function(f) {
+        if(f.name === 'password_confirm') confirmPasswordField = f
+        else fieldsMap[f.name] = f
+      })
+    } catch(e) {}
+  }
+
+  // ── 4. Record existant en édition (elements.record → result[key].rows[0]) ──
+  var existingRecord = (elements.record && result[elements.record] && result[elements.record].rows[0])
+                       ? result[elements.record].rows[0] : null
+
+  // ── 5. Vals array ordonné par columns (comme admin-row) ───────────────────
+  var valsArr = existingRecord
+    ? columns.map(function(c) { var v = existingRecord[c.name]; return v !== undefined && v !== null ? v : '' })
+    : null
+
+  // ── 6. Résolution des colonnes visibles avec enrichissement ───────────────
+  var visibleCols = []
+  columns.forEach(function(col, i) {
+    var field   = fieldsAll ? null : fieldsMap[col.name]
+    if(!fieldsAll && !field) return                       // filtré
+    if(col.fk && (!fkOptions[col.fk] || !Object.keys(fkOptions[col.fk]).length)) return  // FK sans options → masqué
+    var type     = field ? field.type     : (col.fk ? 'select' : 'text')
+    var mandatory= (field && field.mandatory !== undefined)
+                   ? field.mandatory
+                   : !!(col.notnull && !col.pk && col.dflt_value === null)
+    var tag      = (field && field.tag) || col.name
+    var hint     = field ? field.hint : null
+    var isRO     = !!(col.pk && existingRecord)
+    var order = (field && field.order != null) ? field.order : i
+    visibleCols.push({col: col, i: i, order: order, type: type, mandatory: mandatory, tag: tag, hint: hint, isRO: isRO})
+  })
+  visibleCols.sort(function(a, b) { return a.order - b.order })
+
+  var action = '/admin/form/auth/' + elements.mode
+
+  // v8.2.0 — mode reset : token propagé via la query string du POST pour rester
+  // symétrique à la route GET /verify et pouvoir être validé par _consumeToken.
+  var resetToken = (elements.mode === 'reset') ? (req.query.token || '') : ''
+  if(elements.mode === 'reset' && resetToken) action += '?token=' + encodeURIComponent(resetToken)
+
+  var mailAvailable = req.app && req.app.locals && (
+    (req.app.locals.mail && req.app.locals.mail.isAvailable)
+    || req.app.locals.mailAvailable === true
+  )
+
+  // ── 7. authFields — tableau fields JSON pour <admin-row mode="form"> ───────
+  var authFields = []
+  authFields.push({type: 'hidden', name: 'next', value: elements.next || ''})
+  authFields.push({type: 'hidden', name: 'lang', value: lang           || ''})
+  if(elements.mode === 'reset' && resetToken) {
+    authFields.push({type: 'hidden', name: 'token', value: resetToken})
+  }
+
+  visibleCols.forEach(function(vc) {
+    var value = (valsArr && valsArr[vc.i] != null) ? String(valsArr[vc.i]) : ''
+    var lbl   = _gi(result, vc.tag)
+    var fld
+
+    if(vc.type === 'select') {
+      var opts  = fkOptions[vc.col.fk] || {}
+      var items = [{label: '---', value: ''}]
+      Object.keys(opts).forEach(function(k) { items.push({label: opts[k], value: k}) })
+      fld = {name: vc.col.name, type: 'select', label: lbl, items: items, value: value}
+      if(vc.hint)  fld.hint     = _gi(result, vc.hint)
+      if(vc.isRO) { fld.readonly = true; fld.disabled = true }
+    } else {
+      fld = {name: vc.col.name, type: vc.type, label: lbl}
+      if(vc.hint)      fld.hint     = _gi(result, vc.hint)
+      if(vc.mandatory) fld.required = true
+      if(vc.isRO) {
+        fld.readonly = true
+        fld.value    = value
+      } else if(vc.type !== 'password') {
+        fld.value = value
+      }
+      if(vc.type === 'email'    && !existingRecord) fld.autofocus = true
+      if(vc.type === 'password')                    fld.hash      = 'sha256'
+    }
+    authFields.push(fld)
+
+    if(vc.type === 'password' && confirmPasswordField) {
+      authFields.push({
+        type:     'password',
+        name:     'password_confirm',
+        label:    _gi(result, confirmPasswordField.tag || 'passwd-confirm'),
+        required: !!confirmPasswordField.mandatory,
+        confirm:  vc.col.name
+      })
+    }
+  })
+
+  // v8.2.0 : reset sans token = rien à valider — bouton désactivé.
+  var submitDisabled = existingRecord ? true : undefined
+  if(elements.mode === 'reset' && !resetToken) submitDisabled = true
+
+  authFields.push({
+    type:     'submit',
+    label:    _gi(result, 'btn-' + elements.mode),
+    disabled: submitDisabled
+  })
+  if(elements.mode === 'signin' && mailAvailable) {
+    // Lien « Mot de passe oublié ? » — avant le lien signup-other.
+    authFields.push({type: 'link', label: _gi(result, 'link-forgot'),
+                     href: '/admin/form/auth/forgot?lang=' + encodeURIComponent(lang)})
+  }
+  if(elements.mode === 'me') {
+    // Se désinscrire → DELETE /admin/api/auth/me avec confirmation.
+    // next-me-other (glossaire) pointait vers 'signup' (inaccessible à l'owner → boucle 401).
+    var _confirmMsg = _gi(result, 'confirm-unregister')
+    if(_confirmMsg === 'confirm-unregister') _confirmMsg = lang === 'en'
+      ? 'Are you sure you want to delete your account? This action cannot be undone.'
+      : 'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'
+    authFields.push({type: 'link', label: _gi(result, 'btn-me-other'), method: 'DELETE',
+                     href: '/admin/api/auth/me', confirm: _confirmMsg,
+                     next: '/admin/form/auth/signin?lang=' + encodeURIComponent(lang)})
+  } else {
+    authFields.push({type: 'link', label: _gi(result, 'btn-' + elements.mode + '-other'),
+                     href: '/admin/form/auth/' + _gi(result, 'next-' + elements.mode + '-other') + '?lang=' + encodeURIComponent(lang)})
+  }
+%>
+  <h2><%=_gi(result, 'nav-' + elements.mode)%></h2>
+
+<% var _errTag = _msgTag(req.query.error); if(_errTag) { %>
+  <p class="error"><%=_gi(result, _errTag)%></p>
+  <% if(_errTag === 'account-not-verified') { %>
+    <form class="auth-form" method="post" action="/admin/form/auth/verify/resend?lang=<%=lang%>">
+      <input type="email" name="email" placeholder="<%=_gi(result, 'signin-email')%>" required>
+      <input type="hidden" name="_csrf" value="<%=CSRFToken%>">
+      <button type="submit"><%=_gi(result, 'verify-resend')%></button>
+    </form>
+  <% } %>
+<% } %>
+<% var _infoTag = _msgTag(req.query.info); if(_infoTag) { %>
+  <p class="info"><%=_gi(result, _infoTag)%></p>
+<% } %>
+<% if(elements.mode === 'reset' && !resetToken) { %>
+  <p class="error"><%=_gi(result, 'reset-invalid')%></p>
+<% } %>
+
+  <script type="module" src="/custom/admin-row/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+
+  <admin-row mode="form" action="<%=action%>" fields="<%=JSON.stringify(authFields)%>"></admin-row>
+
+<% if(existingRecord) { %>
+  <div class="nav-info">
+    <form method="POST" action="/admin/form/auth/signout" style="display:inline">
+      <input type="hidden" name="lang" value="<%=lang%>">
+      <button type="submit"><%=_gi(result, 'btn-signout')%></button>
+    </form>
+  </div>
+<% } %>
+
+<%# admin-auth.ejs v8.4.1 %>

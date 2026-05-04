@@ -1,0 +1,67 @@
+<%
+/**
+ * \file     (WaTE) common.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   1.4.0
+ * \brief     Template de test générique — rendu de toute page CMS en mode test.
+ *
+ * \details   Affiche la route, la langue, le profil, l'identifiant de session
+ *            et les données JSON retournées par les queries de la page.
+ *            Inclut le fragment elements.template quand il est défini (pages admin)
+ *            en utilisant le chemin relatif ../../views/ (views moteur).
+ *            Utilisé uniquement par l'application de test (test/app.js).
+ *
+ *            v1.1.0 : include du fragment elements.template quand défini —
+ *                     nécessaire depuis Phase 2 (serve() → common.ejs + jsHandlers).
+ *            v1.2.0 : injection des <script> depuis elements.scripts —
+ *                     même logique que views/common.ejs pour tester les scripts externes.
+ *            v1.3.0 : _gi = glossaryItem défini et passé aux fragments inclus —
+ *                     même pattern que views/common.ejs v1.5.0+.
+ *            v1.4.0 : nav-menu rendu en <nav> — rend les hrefs visibles dans le HTML de
+ *                     test (menu de navigation chargé via elements['nav-menu']).
+ */
+var _gi      = glossaryItem
+var scripts  = elements && elements.scripts ? JSON.parse("[" + elements.scripts + "]") : []
+var _navItems = elements && elements['nav-menu'] ? JSON.parse('[' + elements['nav-menu'] + ']') : []
+%>
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WaTE<% if(elements && elements.title) { %> — <%=elements.title%><% } %></title>
+  <% for(var s of scripts) { %>
+  <script type="<%=s.type%>" src="<%=s.path%>"<% if(s.options) { %> <%=s.options%><% } %>></script>
+  <% } %>
+</head>
+<body>
+  <h1>WaTE Mini App</h1>
+
+  <table border="1" cellpadding="6">
+    <tr><th>Route</th>   <td><code><%= req.path %></code></td></tr>
+    <tr><th>Langue</th>  <td><code><%= lang %></code></td></tr>
+    <tr><th>Profil</th>  <td><code><%= profil_id %></code></td></tr>
+    <tr><th>Session</th> <td><code><%= req.cookies && req.cookies.session ? req.cookies.session.id : '(anonyme)' %></code></td></tr>
+  </table>
+
+  <% if(_navItems.length > 0) { %>
+  <nav><% _navItems.forEach(function(item) { %><a href="<%=item.href%>"><%=item.text%></a> <% }) %></nav>
+  <% } %>
+
+  <% if(Object.keys(result).length > 0) { %>
+  <h2>Données</h2>
+  <pre><%- JSON.stringify(result, null, 2) %></pre>
+  <% } %>
+
+<% if(elements && elements.template) { %>
+  <%- include('../../views/' + elements.template + '.ejs', {_gi}) %>
+<% } %>
+
+  <script type="module" nonce="<%=nonce%>">
+    console.log('WaTE Mini App — nonce OK')
+  </script>
+</body>
+</html>
+<%# test/views/common.ejs v1.4.0 %>

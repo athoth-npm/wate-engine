@@ -1,0 +1,14 @@
+/**
+ * \file      (WaTE) custom/show-image/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   1.0.0
+ * \brief     Styles du custom element <show-image>.
+ */
+
+:host {
+  display: block;
+}
+
+/* (WaTE) custom/show-image/def.css v1.0.1 */

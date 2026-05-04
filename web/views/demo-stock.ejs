@@ -1,0 +1,161 @@
+<%
+/**
+ * \file      (WaTE) web/views/demo-stock.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.1.0
+ * \brief     Fragment page /demo/stock — interface métier de gestion de stock.
+ *
+ * \details   Page rendue pour les profils 10 (demo-owner) et 11 (gestionnaire).
+ *            Le moteur charge automatiquement les requêtes définies dans
+ *            _item (queries) et expose result.products / result.movements.
+ *
+ *            Le formulaire « ajouter un mouvement » poste sur le moteur DB
+ *            générique : POST /admin/form/db/demo_mouvement/insert.
+ *
+ *            v1.1.0 — Tri, recherche et export des données.
+ */
+
+var products  = (result.products  && result.products.rows)  || []
+var movements = (result.movements && result.movements.rows) || []
+var isOwner   = (profil_id === 10)
+var justReset = !!req.query.reset
+
+// URLs d'export (API moteur)
+var exportProducts  = '/admin/api/db/demo_produit/export'
+var exportMovements = '/admin/api/db/demo_mouvement/export'
+%>
+<% if (justReset) { %>
+  <div class="demo-flash"><%=_gi(result, 'demo-reset-done')%></div>
+<% } %>
+
+<section class="demo-section">
+  <header class="demo-section-head">
+    <h1 class="demo-section-h"><%=_gi(result, 'demo-stock-h')%></h1>
+    <div class="demo-section-actions">
+      <a class="btn btn-ghost btn-sm" href="<%=exportProducts%>?format=csv" title="CSV">&#8615; CSV</a>
+      <a class="btn btn-ghost btn-sm" href="<%=exportProducts%>?format=json" title="JSON">&#8615; JSON</a>
+      <a class="btn btn-ghost btn-sm btn-action" href="/demo/api/logout"><%=_gi(result, 'demo-logout')%></a>
+    </div>
+  </header>
+  <p class="demo-intro"><%=_gi(result, 'demo-stock-intro')%></p>
+
+  <div class="demo-toolbar">
+    <input type="text" class="demo-search" placeholder="Rechercher un produit..." data-filter="products">
+  </div>
+
+  <table class="demo-table" id="products">
+    <thead>
+      <tr>
+        <th class="sortable" data-sort="products" data-col="0"><%=_gi(result, 'demo-col-ref')%> <span class="sort-arrow">&#x2195;</span></th>
+        <th class="sortable" data-sort="products" data-col="1"><%=_gi(result, 'demo-col-nom')%> <span class="sort-arrow">&#x2195;</span></th>
+        <th class="sortable num" data-sort="products" data-col="2"><%=_gi(result, 'demo-col-prix')%> <span class="sort-arrow">&#x2195;</span></th>
+        <th class="sortable num" data-sort="products" data-col="3"><%=_gi(result, 'demo-col-stock')%> <span class="sort-arrow">&#x2195;</span></th>
+      </tr>
+    </thead>
+    <tbody>
+    <% products.forEach(function(p) { %>
+      <tr>
+        <td><code><%=p.ref%></code></td>
+        <td><%=p.nom%></td>
+        <td class="num"><%=p.prix.toFixed(2)%> €</td>
+        <td class="num <%= p.stock < 10 ? 'low' : '' %>"><%=p.stock%></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<section class="demo-section">
+  <h2 class="demo-section-h"><%=_gi(result, 'demo-add-h')%></h2>
+  <%# Le formulaire poste sur le moteur DB générique (insert sur 'demo_mouvement').
+      _data.modify vérifie _access(profil_id, 'demo_mouvement', 'insert') et le
+      trigger SQLite met à jour demo_produit.stock automatiquement. %>
+  <form class="demo-form" method="post" action="/admin/form/db/demo_mouvement/insert">
+    <input type="hidden" name="_csrf" value="<%=CSRFToken%>">
+    <div class="demo-form-row">
+      <label class="demo-form-field">
+        <span><%=_gi(result, 'demo-add-product')%></span>
+        <select name="produit_id" required>
+          <% products.forEach(function(p) { %>
+            <option value="<%=p.id%>"><%=p.ref%> — <%=p.nom%> <%='('+p.stock+' en stock)'%></option>
+          <% }) %>
+        </select>
+      </label>
+      <label class="demo-form-field">
+        <span><%=_gi(result, 'demo-add-type')%></span>
+        <select name="type" required>
+          <option value="entree"><%=_gi(result, 'demo-add-type-in')%></option>
+          <option value="sortie"><%=_gi(result, 'demo-add-type-out')%></option>
+        </select>
+      </label>
+      <label class="demo-form-field">
+        <span><%=_gi(result, 'demo-add-qty')%></span>
+        <input type="number" name="quantite" min="1" required>
+      </label>
+    </div>
+    <label class="demo-form-field demo-form-field-wide">
+      <span><%=_gi(result, 'demo-add-motif')%></span>
+      <input type="text" name="motif" placeholder="Réception, vente, casse…">
+    </label>
+    <div class="demo-form-submit">
+      <button type="submit" class="btn btn-primary"><%=_gi(result, 'demo-add-submit')%></button>
+    </div>
+  </form>
+</section>
+
+<section class="demo-section">
+  <div class="demo-section-head">
+    <h2 class="demo-section-h"><%=_gi(result, 'demo-history-h')%></h2>
+    <div class="demo-section-actions">
+      <a class="btn btn-ghost btn-sm" href="<%=exportMovements%>?format=csv" title="CSV">&#8615; CSV</a>
+      <a class="btn btn-ghost btn-sm" href="<%=exportMovements%>?format=json" title="JSON">&#8615; JSON</a>
+    </div>
+  </div>
+  <% if (movements.length === 0) { %>
+    <p class="demo-muted"><%=_gi(result, 'demo-history-empty')%></p>
+  <% } else { %>
+    <div class="demo-toolbar">
+      <input type="text" class="demo-search" placeholder="Filtrer les mouvements..." data-filter="movements">
+    </div>
+    <table class="demo-table" id="movements">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="movements" data-col="0">Date <span class="sort-arrow">&#x2195;</span></th>
+          <th class="sortable" data-sort="movements" data-col="1">Produit <span class="sort-arrow">&#x2195;</span></th>
+          <th class="sortable" data-sort="movements" data-col="2"><%=_gi(result, 'demo-add-type')%> <span class="sort-arrow">&#x2195;</span></th>
+          <th class="sortable num" data-sort="movements" data-col="3"><%=_gi(result, 'demo-add-qty')%> <span class="sort-arrow">&#x2195;</span></th>
+          <th class="sortable" data-sort="movements" data-col="4"><%=_gi(result, 'demo-add-motif')%> <span class="sort-arrow">&#x2195;</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      <% movements.forEach(function(m) { %>
+        <tr>
+          <td><%=m.date%></td>
+          <td><code><%=m.produit_ref%></code> — <%=m.produit_nom%></td>
+          <td><span class="demo-pill demo-pill-<%=m.type%>"><%= m.type === 'entree' ? _gi(result, 'demo-add-type-in') : _gi(result, 'demo-add-type-out') %></span></td>
+          <td class="num"><%=m.quantite%></td>
+          <td class="demo-muted"><%=m.motif || ''%></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<section class="demo-section demo-tools">
+  <a class="btn btn-ghost" href="/admin/form/db/schema"><%=_gi(result, 'demo-admin-link')%></a>
+
+  <% if (isOwner) { %>
+    <a class="btn btn-ghost" href="/admin/form/db?table=_audit">Journal d'audit</a>
+    <div class="demo-reset">
+      <h3><%=_gi(result, 'demo-reset-h')%></h3>
+      <p class="demo-muted"><%=_gi(result, 'demo-reset-p')%></p>
+      <a class="btn btn-primary btn-action" href="/demo/api/reset"><%=_gi(result, 'demo-reset-btn')%></a>
+    </div>
+  <% } %>
+</section>
+
+
+<%# (WaTE) web/views/demo-stock.ejs v1.1.1 %>

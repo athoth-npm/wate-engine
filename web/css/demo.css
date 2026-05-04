@@ -1,0 +1,373 @@
+/**
+ * \file      (WaTE) web/css/demo.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.1.2
+ * \brief     Styles des pages /demo et /demo/stock.
+ *
+ * \details   Réutilise les variables et classes utilitaires de common.css
+ *            (--wate-navy, --wate-orange, --bg-elev, .btn, .btn-primary, etc.).
+ */
+
+/* ── Hero — page d'accueil démo ───────────────────────────────────── */
+.demo-hero {
+  padding: clamp(2em, 5vw, 3em) 0 1.5em;
+  text-align: center;
+}
+.demo-hero-title {
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4em;
+}
+.demo-hero-subtitle {
+  max-width: 42em;
+  margin: 0 auto 1.5em;
+  color: var(--text-muted);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.55;
+}
+
+.demo-cta {
+  display: flex;
+  gap: 0.8em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.demo-status {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.2em;
+  max-width: 32em;
+  margin: 0 auto;
+  box-shadow: var(--shadow-sm);
+}
+.demo-status p {
+  margin: 0 0 1em;
+  color: var(--text);
+}
+
+/* ── Cartes des rôles ─────────────────────────────────────────────── */
+.demo-roles {
+  padding: 2em 0 1em;
+}
+.demo-roles-title {
+  text-align: center;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 1.2em;
+}
+.demo-roles-grid {
+  display: grid;
+  gap: 1em;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .demo-roles-grid { grid-template-columns: 1fr 1fr; gap: 1.4em }
+}
+.demo-role {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--wate-orange);
+  border-radius: var(--radius);
+  padding: 1.3em 1.4em;
+  box-shadow: var(--shadow-sm);
+}
+.demo-role h3 {
+  margin: 0 0 0.5em;
+  color: var(--wate-navy);
+  font-size: 1.1em;
+  font-weight: 700;
+}
+.demo-role p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+
+/* ── Page stock ───────────────────────────────────────────────────── */
+.demo-section {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2em, 3vw, 1.8em);
+  margin: 0 0 1.5em;
+  box-shadow: var(--shadow-sm);
+}
+.demo-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+  flex-wrap: wrap;
+  margin-bottom: 0.5em;
+}
+.demo-section-h {
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 700;
+  color: var(--wate-navy);
+  margin: 0 0 0.5em;
+  letter-spacing: -0.01em;
+}
+.demo-intro {
+  color: var(--text-muted);
+  margin: 0 0 1.2em;
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+.demo-muted {
+  color: var(--text-muted);
+}
+.demo-flash {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-left: 3px solid var(--success-color);
+  border-radius: var(--radius);
+  padding: 0.8em 1.2em;
+  color: var(--success-color);
+  font-weight: 600;
+  margin: 0 0 1.5em;
+}
+
+/* Bouton plus petit pour le « se déconnecter » dans l'en-tête de section */
+.btn-sm {
+  padding: 0.35em 0.9em;
+  font-size: 0.85em;
+}
+
+/* ── Barre d'outils ───────────────────────────────────────────────── */
+.demo-toolbar {
+  margin: 0 0 0.8em;
+}
+.demo-search {
+  width: 100%;
+  max-width: 24em;
+  padding: 0.45em 0.7em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 0.9em;
+  font-family: inherit;
+  color: var(--text);
+}
+.demo-search:focus {
+  outline: 2px solid var(--wate-orange);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.demo-section-actions {
+  display: flex;
+  gap: 0.4em;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ── Tableau ──────────────────────────────────────────────────────── */
+.demo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+.demo-table thead th {
+  text-align: left;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.5em 0.8em;
+  border-bottom: 2px solid var(--border);
+  user-select: none;
+}
+.demo-table thead th.sortable {
+  cursor: pointer;
+  transition: color 0.15s;
+  display: table-cell;
+}
+.demo-table thead th.sortable:hover {
+  color: var(--wate-orange);
+}
+.sort-arrow {
+  font-size: 1.2em;
+  margin-left: 0.15em;
+}
+.sort-arrow.asc,
+.sort-arrow.desc {
+  color: var(--wate-orange);
+  font-weight: 700;
+}
+.demo-table tbody td {
+  padding: 0.6em 0.8em;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.demo-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.demo-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.demo-table .num.low {
+  color: var(--wate-orange-dk);
+  font-weight: 700;
+}
+.demo-table code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--wate-navy);
+}
+
+/* ── Pills entrée/sortie ──────────────────────────────────────────── */
+.demo-pill {
+  display: inline-block;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+}
+.demo-pill-entree {
+  background: var(--success-bg);
+  color: var(--success-color);
+}
+.demo-pill-sortie {
+  background: var(--orange-light);
+  color: var(--wate-orange-dk);
+}
+
+/* ── Formulaire mouvement ─────────────────────────────────────────── */
+.demo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9em;
+}
+.demo-form-row {
+  display: grid;
+  gap: 0.9em;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .demo-form-row { grid-template-columns: 2fr 1fr 1fr }
+}
+.demo-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.demo-form-field span {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.demo-form-field input,
+.demo-form-field select {
+  padding: 0.55em 0.7em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 1em;
+  color: var(--text);
+  font-family: inherit;
+}
+.demo-form-field input:focus,
+.demo-form-field select:focus {
+  outline: 2px solid var(--wate-orange);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.demo-form-submit {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Outils en pied de page ───────────────────────────────────────── */
+.demo-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+.demo-reset h3 {
+  margin: 0 0 0.4em;
+  color: var(--wate-navy);
+  font-size: 1.05em;
+  font-weight: 700;
+}
+.demo-reset p {
+  margin: 0 0 0.8em;
+}
+
+/* ── Code source ─────────────────────────────────────────────────────── */
+.demo-code {
+  padding: 2em 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 2em;
+}
+.demo-code-title {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 700;
+  color: var(--wate-navy);
+  margin: 0 0 0.4em;
+}
+.demo-code-intro {
+  color: var(--text-muted);
+  margin: 0 0 1.5em;
+  line-height: 1.6;
+}
+.demo-tree {
+  margin: 0 0 1.5em;
+  padding: 1em 1.2em;
+  background: var(--wate-navy);
+  color: var(--code-color);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.demo-tree code { font-family: inherit }
+
+.demo-code-block {
+  margin: 0 0 0.5em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+}
+.demo-code-block[open] { border-color: var(--wate-orange) }
+
+.demo-code-summary {
+  padding: 0.8em 1.2em;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--wate-navy);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.demo-code-summary:hover { color: var(--wate-orange) }
+
+.demo-code-block pre {
+  margin: 0;
+  padding: 1.2em;
+  background: var(--code-bg);
+  color: var(--code-color);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  line-height: 1.55;
+  border-top: 1px solid var(--border);
+}
+.demo-code-block code { font-family: inherit }
+
+/* (WaTE) web/css/demo.css v1.1.2 */

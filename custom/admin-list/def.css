@@ -1,0 +1,40 @@
+/**
+ * \file      (WaTE) custom/admin-list/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      01/09/2025
+ * \version   1.2.0
+ * \brief     Style shadow DOM des custom elements liste FK admin.
+ *
+ * \details   Variables CSS locales sur :host — surchargeables par l'application.
+ *
+ *            v1.0.0 : version initiale.
+ *            v1.1.0 : simplification des règles redondantes.
+ *            v1.2.0 : couleurs migrées en custom properties sur :host.
+ */
+
+:host {
+  display: block;
+  width: 100%;
+
+  --al-border:   var(--wate-border, #aaa);
+  --al-radius:   var(--wate-radius, 4px);
+  --al-bg:       var(--wate-bg, #fff);
+  --al-disabled: var(--wate-bg-disabled, #f0f0f0);
+}
+
+select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--al-border);
+  border-radius: var(--al-radius);
+  padding: 2px 4px;
+  font-size: 0.833rem;
+  background: var(--al-bg);
+  color: #000;
+  cursor: pointer;
+}
+
+select:disabled { background: var(--al-disabled); color: #666; border-color: #ccc; cursor: default; }
+
+/* (WaTE) custom/admin-list/def.css v1.2.0 */

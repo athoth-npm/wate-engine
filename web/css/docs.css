@@ -1,0 +1,228 @@
+/**
+ * \file      (WaTE) web/css/docs.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-25
+ * \version   1.5.0
+ * \brief     Styles de la page /docs — layout 3 colonnes TOC/content/on-this-page.
+ *
+ * \details   Mobile-first : stack vertical, la TOC se replie dans un <details>.
+ *            ≥ 900px : 2 colonnes (TOC + contenu).
+ *
+ *            La TOC sticky avec top/bottom calculés sur la hauteur du header +
+ *            footer sticky — offset 64px haut, 48px bas (padding inclus).
+ *
+ *            v1.1.0 — section 2 « Architecture » : .docs-figure pour encadrer
+ *                     les <wate-stack> et <wate-flow> ; .is-section pour les
+ *                     têtes de section dans le sommaire latéral. Les règles
+ *                     .docs-diagram-placeholder ont été retirées (le placeholder
+ *                     a été remplacé par un vrai diagramme).
+ *            v1.2.0 — colonne centrale élargie (220→200 TOC, 200→180 sommaire,
+ *                     gap 2em→1.6em) pour donner plus de place aux diagrammes.
+ *            v1.3.0 — suppression de la colonne « on this page » (redondante
+ *                     avec la TOC qui liste déjà les 10 sections). Layout 2
+ *                     colonnes max : TOC + contenu.
+ *            v1.4.0 — sur très grand écran (≥1396px), .docs-layout déborde
+ *                     vers la GAUCHE de (200px + gap) pour que le bord droit
+ *                     de .docs-content s'aligne sur celui de / et /examples.
+ *                     La TOC sticky occupe la marge libérée à gauche.
+ *            v1.5.0 — styles pour <code> (inline, fond gris clair), <pre>
+ *                     (bloc sombre), <ul>/<ol> (listes dans le contenu).
+ */
+
+/* ── Layout principal ──────────────────────────────────────────────── */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5em;
+  padding: 0.5em 0 2em;
+}
+
+/* ── Colonne gauche — TOC ──────────────────────────────────────────── */
+.docs-toc {
+  font-size: 0.93em;
+}
+
+.docs-toc-collapsible { /* <details> mobile — ouvert mais repliable */
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8em 1em;
+}
+
+.docs-toc-label {
+  cursor: pointer;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  list-style: none;
+  padding: 0.1em 0;
+}
+.docs-toc-label::-webkit-details-marker { display: none }
+.docs-toc-label::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.4em;
+  transition: transform 0.15s;
+  color: var(--wate-orange);
+}
+.docs-toc-collapsible[open] .docs-toc-label::before { transform: rotate(90deg) }
+
+.docs-toc nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  margin-top: 0.7em;
+}
+
+.docs-toc-link {
+  display: block;
+  padding: 0.45em 0.7em;
+  border-radius: 6px;
+  color: var(--text);
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  font-weight: 500;
+}
+.docs-toc-link:hover {
+  background: var(--bg);
+  color: var(--wate-navy);
+}
+.docs-toc-link.is-active {
+  background: #fff4dc;
+  color: var(--wate-orange-dk);
+  border-left-color: var(--wate-orange);
+  font-weight: 600;
+}
+.docs-toc-link.is-soon {
+  color: var(--text-muted);
+  cursor: default;
+  pointer-events: none;
+}
+.docs-toc-link.is-soon em {
+  font-style: italic;
+  font-size: 0.82em;
+  opacity: 0.75;
+}
+
+/* ── Colonne centrale — Contenu ────────────────────────────────────── */
+.docs-content {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2em, 3vw, 2.4em);
+  box-shadow: var(--shadow-sm);
+  min-width: 0; /* évite l'overflow horizontal en grid */
+}
+
+.docs-section h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4em;
+}
+
+.docs-lead {
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  color: var(--text-muted);
+  margin: 0 0 2em;
+  line-height: 1.7;
+}
+
+.docs-section h2 {
+  font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+  font-weight: 700;
+  color: var(--wate-navy);
+  margin: 2em 0 0.6em;
+  padding-top: 0.4em;
+  scroll-margin-top: 5em; /* offset header sticky (site-header ~4em + marge) */
+}
+
+.docs-section p {
+  margin: 0 0 1.1em;
+  line-height: 1.75;
+}
+
+/* ── Inline code ─────────────────────────────────────────────────────── */
+.docs-section code {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: #f0f0f0;
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+.docs-section pre {
+  margin: 0 0 1.5em;
+  padding: 1em 1.2em;
+  background: #2d2d2d;
+  color: #f8f8f2;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-size: 0.88em;
+  line-height: 1.55;
+}
+
+.docs-section pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+.docs-section ul, .docs-section ol {
+  margin: 0 0 1.1em;
+  padding-left: 1.5em;
+  line-height: 1.75;
+}
+
+.docs-section li {
+  margin-bottom: 0.35em;
+}
+
+/* ── Figures de diagramme (<wate-stack>, <wate-flow>, <wate-tree>) ─── */
+.docs-figure {
+  margin: 2em 0 1.5em;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  /* Grid 200px (TOC) + 1fr (contenu) avec gap 1.6em.
+     Pour que .docs-content (boîte encadrée) finisse au même bord droit que
+     les pages /, /examples (qui ne sont pas en grid), on étend .docs-layout
+     vers la GAUCHE de (200px + gap) via un margin-left négatif. Résultat :
+     - .docs-content (1fr) commence là où commenceraient / et /examples,
+     - .docs-toc déborde à gauche dans la zone laissée libre.
+     L'effet est annulé sous 1180+216=1396px de viewport (sinon la TOC sort
+     de l'écran à gauche) — on revient au layout block. */
+  .docs-layout {
+    grid-template-columns: 200px 1fr;
+    gap: 1.6em;
+  }
+  .docs-toc {
+    position: sticky;
+    top: 5em;
+    align-self: start;
+    max-height: calc(100vh - 9em);
+    overflow-y: auto;
+  }
+  /* Sur desktop le <details> reste ouvert et non replié — on neutralise */
+  .docs-toc-label {
+    pointer-events: none;
+    cursor: default;
+  }
+  .docs-toc-label::before { display: none }
+}
+
+/* Décalage à gauche du grid : TOC déborde dans l'espace à gauche du
+   .site-main, .docs-content (1fr) s'aligne avec / et /examples côté droit. */
+@media (min-width: 1396px) {
+  .docs-layout {
+    margin-left: calc(-200px - 1.6em);
+  }
+}
+
+/* (WaTE) web/css/docs.css v1.5.0 */

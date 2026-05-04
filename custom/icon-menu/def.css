@@ -1,0 +1,98 @@
+/**
+ * \file      (WaTE) custom/icon-menu/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      16/04/2026
+ * \version   1.2.0
+ * \brief     Style shadow DOM du custom element <icon-menu>.
+ *
+ * \details   Variables CSS locales sur :host — surchargeables par l'application
+ *            hôte sans modifier ce fichier.
+ *
+ *            v1.0.0 : version initiale.
+ *            v1.1.0 : hover sur :host(:hover) au lieu de .iconMenu:hover.
+ *            v1.2.0 : couleurs migrées en custom properties sur :host.
+ */
+
+:host {
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+
+  --im-bg:         var(--wate-marine-dk, #001633);
+  --im-border:     var(--wate-orange, #f0a500);
+  --im-text:       var(--wate-text, #c8ddf0);
+  --im-hover-bg:   var(--wate-marine, #002147);
+  --im-hover-text: var(--wate-orange, #f0a500);
+  --im-sep:        var(--wate-orange-l, rgba(240, 165, 0, .3));
+  --im-glow:       var(--wate-orange, #f0a500);
+}
+
+/* ── Icône déclencheur ───────────────────────────────────────────────────── */
+
+.iconMenu > a img {
+  height: 40px;
+  aspect-ratio: 1 / 1;
+  display: block;
+  transition: filter .15s;
+}
+
+:host(:hover) .iconMenu > a img,
+:host(:focus-within) .iconMenu > a img {
+  filter: drop-shadow(0 0 5px var(--im-glow));
+}
+
+/* ── Dropdown ────────────────────────────────────────────────────────────── */
+
+.iconMenu > div {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  background: var(--im-bg);
+  border: 2px solid var(--im-border);
+  border-radius: 6px;
+  min-width: 180px;
+  padding: 4px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .6);
+}
+
+:host(:hover) .iconMenu > div,
+:host(:focus-within) .iconMenu > div {
+  display: block;
+}
+
+/* ── Items du dropdown ───────────────────────────────────────────────────── */
+
+.iconMenu > div a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  color: var(--im-text);
+  text-decoration: none;
+  font: 0.833rem Verdana, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.iconMenu > div a:hover {
+  background: var(--im-hover-bg);
+  color: var(--im-hover-text);
+}
+
+.iconMenu > div a img {
+  height: 18px;
+  width: 18px;
+  object-fit: contain;
+  opacity: .8;
+}
+
+.iconMenu > div hr {
+  border: none;
+  border-top: 1px solid var(--im-sep);
+  margin: 4px 10px;
+}
+
+/* (WaTE) custom/icon-menu/def.css v1.2.0 */

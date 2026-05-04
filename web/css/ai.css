@@ -1,0 +1,147 @@
+/**
+ * \file      (WaTE) web/css/ai.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   1.0.0
+ * \brief     Styles de la page /ai — WaTE + IA.
+ */
+
+/* ── Hero ────────────────────────────────────────────────────────────── */
+.ai-hero {
+  text-align: center;
+  padding: clamp(2em, 5vw, 3em) 0 1.5em;
+}
+.ai-hero-title {
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4em;
+}
+.ai-hero-subtitle {
+  max-width: 48em;
+  margin: 0 auto 1.5em;
+  color: var(--text-muted);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.65;
+}
+
+/* ── Arguments ───────────────────────────────────────────────────────── */
+.ai-arguments {
+  display: grid;
+  gap: 1.4em;
+  padding-bottom: 2em;
+}
+@media (min-width: 720px) {
+  .ai-arguments { grid-template-columns: 1fr 1fr; gap: 1.6em }
+}
+.ai-arg {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--wate-orange);
+  border-radius: var(--radius);
+  padding: 1.2em 1.4em;
+  box-shadow: var(--shadow-sm);
+}
+.ai-arg-h {
+  margin: 0 0 0.4em;
+  color: var(--wate-navy);
+  font-size: 1.05em;
+  font-weight: 700;
+}
+.ai-arg-p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+
+/* ── Prompts ─────────────────────────────────────────────────────────── */
+.ai-prompts { padding-bottom: 2em }
+.ai-prompts-title {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: var(--wate-navy);
+  margin: 0 0 1em;
+}
+.ai-prompt {
+  margin: 0 0 0.5em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+}
+.ai-prompt[open] { border-color: var(--wate-orange) }
+.ai-prompt-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.7em 1.2em;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--wate-navy);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.ai-prompt-summary span { flex: 1 }
+.ai-prompt-summary:hover { color: var(--wate-orange) }
+
+.copy-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: 4px;
+  background: var(--bg-elev, #fff);
+  cursor: pointer;
+  position: relative;
+}
+.copy-btn::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1.5px solid var(--text-muted, #5a6a7e);
+  border-radius: 2px;
+}
+.copy-btn::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--text-muted, #5a6a7e);
+  border-radius: 1px;
+  background: var(--bg-elev, #fff);
+  z-index: 1;
+}
+.copy-btn:hover { border-color: var(--wate-orange, #f0a500) }
+.copy-btn.copied { background: var(--success-bg, #e8f5ee); border-color: var(--success-color, #1a7f3f) }
+.ai-prompt-text {
+  margin: 0;
+  padding: 1em 1.4em;
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-top: 1px solid var(--border);
+  font-size: 0.9em;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-family: var(--font);
+}
+
+/* ── Conclusion ──────────────────────────────────────────────────────── */
+.ai-conclusion {
+  max-width: 48em;
+  margin: 0 auto 2em;
+  padding: 1.2em 1.5em;
+  background: var(--bg);
+  border-left: 4px solid var(--wate-orange);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* (WaTE) web/css/ai.css v1.0.0 */

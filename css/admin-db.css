@@ -1,0 +1,70 @@
+/**
+ * \file      (WaTE) css/admin-db.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      01/09/2025
+ * \version   2.4.0
+ * \brief     Style spécifique à l'interface d'administration DB WaTE (admin-db.ejs).
+ *
+ * \details   Complète common.css (h2, a, p.nav-info déjà définis).
+ *            v1.0.0 : Style initial adapté depuis Figur'In/split/css/data.css.
+ *            v2.0.0 : Couleurs WaTE (#002147 fond, #f0a500 liserets), layout centré,
+ *                     texte blanc, boutons 3D gris, th sombre avec bordure dorée.
+ *            v2.1.0 : #schema-grid ajouté pour la vue schema Merise.
+ *            v2.2.0 : Simplification — suppression des règles redondantes.
+ *                     #schema-grid : gap supprimé, marge portée par :host de <schema-table>.
+ *            v2.3.0 : button:disabled — style grisé pour les boutons light DOM (ex: btn-insert).
+ *                     Renommage data.css → admin-db.css (convention admin-X.css ↔ admin-X.ejs).
+ *            v2.4.0 : nettoyage — suppression du bloc commenté obsolète (body/h1/h2/etc.).
+ *                     Règles partagées (h2, a, p.nav-info) désormais dans common.css.
+ */
+
+/* ── Grille schema (boîtes Merise) ──────────────────────────────────────── */
+
+#schema-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  padding: 2em;
+}
+
+/* ── Conteneur de la table CRUD ─────────────────────────────────────────── */
+
+.data {
+  max-width: 1000px; width: 100%;
+  background-color: rgba(255,255,255,0.04);
+  border: 2px solid #f0a500;
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 80vh;
+}
+
+.data > table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1px 2px;
+}
+
+.data > table thead { position: sticky; top: 0; z-index: 1; }
+
+.data > table th {
+  background-color: #001633;
+  color: #f0a500;
+  font: bold 0.833rem Verdana, sans-serif;
+  border-radius: 6px;
+  padding: 4px 6px;
+  white-space: nowrap;
+  border-bottom: 2px solid #f0a500;
+  text-align: center;
+}
+
+.data > table td { padding: 2px 4px; }
+
+.data > table tbody tr:nth-child(even) { background-color: rgba(255,255,255,0.07); }
+.data > table tbody tr:nth-child(odd)  { background-color: rgba(255,255,255,0.02); }
+
+/* ── Boutons (light DOM) ─────────────────────────────────────────────────── */
+
+/* (WaTE) css/admin-db.css v2.4.1 */

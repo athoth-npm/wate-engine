@@ -1,0 +1,92 @@
+/**
+ * \file      (WaTE) custom/schema-table/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      01/09/2025
+ * \version   1.4.0
+ * \brief     Style shadow DOM du custom element <schema-table>.
+ *
+ * \details   Variables CSS locales sur :host — surchargeables par l'application.
+ *
+ *            v1.0.0 : version initiale.
+ *            v1.1.0 : boîte plus aérée — padding, line-height, ombre portée.
+ *            v1.2.0 : classe .fk, symboles 🔑/🔗.
+ *            v1.3.0 : marge portée par :host via min(2vh,2vw).
+ *            v1.4.0 : couleurs migrées en custom properties sur :host.
+ */
+
+:host {
+  display: inline-block;
+  margin: min(2vh, 2vw) !important;
+
+  --st-border:     var(--wate-orange, #f0a500);
+  --st-bg:         var(--wate-marine, #002147);
+  --st-title-bg:   var(--wate-marine-dk, #001633);
+  --st-title-text: var(--wate-orange, #f0a500);
+  --st-text:       var(--wate-text, #c8ddf0);
+  --st-sep:        rgba(240, 165, 0, .4);
+}
+
+a.box {
+  display: block;
+  min-width: 170px;
+  border: 2px solid var(--st-border);
+  border-radius: 6px;
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--st-bg);
+  box-shadow: 0 3px 10px rgba(0,0,0,.5);
+  transition: box-shadow .15s, transform .15s;
+}
+
+a.box:hover {
+  box-shadow: 0 4px 18px rgba(240,165,0,.45);
+  transform: translateY(-3px);
+}
+
+.box-title {
+  background: var(--st-title-bg);
+  color: var(--st-title-text);
+  font: bold 0.833rem Verdana, sans-serif;
+  text-align: center;
+  padding: 7px 12px;
+  border-bottom: 2px solid var(--st-border);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+ul.box-cols {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+
+ul.box-cols li {
+  display: flex;
+  align-items: center;
+  font: 0.75rem Verdana, sans-serif;
+  color: var(--st-text);
+  padding: 3px 14px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+ul.box-cols li .icon {
+  display: inline-block;
+  width: 1.4em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+ul.box-cols li.pk   { font-weight: bold; text-decoration: underline; color: #f0e0a0; }
+ul.box-cols li.fk   { color: #9ac4e8; }
+ul.box-cols li .fk-ref { font-style: italic; color: #7aaacc; font-size: 0.667rem; }
+
+ul.box-cols li.sep {
+  border-top: 1px solid var(--st-sep);
+  margin: 4px 10px;
+  padding: 0;
+  line-height: 0;
+}
+
+/* (WaTE) custom/schema-table/def.css v1.4.0 */

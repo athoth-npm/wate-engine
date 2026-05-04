@@ -1,0 +1,55 @@
+<%
+/**
+ * \file      (WaTE) web/views/site-home.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-24
+ * \version   1.0.0
+ * \brief     Fragment d'accueil du site vitrine — hero + 3 cartes features.
+ *
+ * \details   Inclus par web/views/common.ejs quand elements.template = 'site-home'.
+ *            Utilise <wate-card> (web/custom/wate-card/) chargé dynamiquement.
+ */
+%>
+<section class="hero">
+  <h1 class="hero-title"><%=_gi(result, 'home-hero-title')%></h1>
+  <p class="hero-subtitle"><%=_gi(result, 'home-hero-subtitle')%></p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="/demo"><%=_gi(result, 'home-cta-demo')%></a>
+    <a class="btn btn-ghost" href="/docs"><%=_gi(result, 'home-cta-docs')%></a>
+    <a class="btn btn-ghost" href="/examples"><%=_gi(result, 'home-cta-examples')%></a>
+    <a class="btn btn-ghost" href="https://github.com/athoth-npm/wate-engine" target="_blank" rel="noopener"><%=_gi(result, 'home-cta-github')%></a>
+  </div>
+</section>
+
+<section class="features">
+  <a href="/docs" class="feature-link">
+    <wate-card
+      icon="db"
+      title="<%=_gi(result, 'home-feat-1-title')%>"
+      body="<%=_gi(result, 'home-feat-1-body')%>"></wate-card>
+  </a>
+  <a href="/examples" class="feature-link">
+    <wate-card
+      icon="light"
+      title="<%=_gi(result, 'home-feat-2-title')%>"
+      body="<%=_gi(result, 'home-feat-2-body')%>"></wate-card>
+  </a>
+  <a href="/demo" class="feature-link">
+    <wate-card
+      icon="shield"
+      title="<%=_gi(result, 'home-feat-3-title')%>"
+      body="<%=_gi(result, 'home-feat-3-body')%>"></wate-card>
+  </a>
+  <a href="/ai" class="feature-link">
+    <wate-card
+      icon="ai"
+      title="<%=_gi(result, 'home-feat-4-title')%>"
+      body="<%=_gi(result, 'home-feat-4-body')%>"></wate-card>
+  </a>
+</section>
+
+<script type="module"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+  import '/custom/wate-card/def.js'
+</script>
+<%# (WaTE) web/views/site-home.ejs v1.0.0 %>

@@ -1,0 +1,87 @@
+/**
+ * \file      (WaTE) web/custom/demo-code-block/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   1.0.0
+ * \brief     Styles du <demo-code-block> — reprend la charte .demo-code-block de demo.css.
+ */
+
+:host { display: block }
+
+.demo-code-block {
+  margin: 0 0 0.5em;
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: var(--radius, 10px);
+  background: var(--bg-elev, #ffffff);
+}
+
+.demo-code-block[open] { border-color: var(--wate-orange, #f0a500) }
+
+.demo-code-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.8em 1.2em;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--wate-navy, #002147);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.demo-code-summary:hover { color: var(--wate-orange, #f0a500) }
+
+.demo-code-summary span { flex: 1 }
+
+.copy-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: 4px;
+  background: var(--bg-elev, #fff);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s;
+}
+.copy-btn::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1.5px solid var(--text-muted, #5a6a7e);
+  border-radius: 2px;
+  background: var(--bg-elev, #fff);
+}
+.copy-btn::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--text-muted, #5a6a7e);
+  border-radius: 1px;
+  background: var(--bg-elev, #fff);
+  z-index: 1;
+}
+.copy-btn:hover { border-color: var(--wate-orange, #f0a500) }
+.copy-btn.copied { background: var(--success-bg, #e8f5ee); border-color: var(--success-color, #1a7f3f) }
+
+.demo-code-block pre {
+  margin: 0;
+  padding: 1.2em;
+  background: var(--code-bg, #001633);
+  color: var(--code-color, #e3ecf5);
+  border-radius: 0 0 var(--radius, 10px) var(--radius, 10px);
+  overflow-x: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  line-height: 1.55;
+  border-top: 1px solid var(--border, #dbe3ec);
+}
+
+.demo-code-block code { font-family: inherit }
+
+/* (WaTE) web/custom/demo-code-block/def.css v1.0.0 */

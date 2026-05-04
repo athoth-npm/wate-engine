@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Patch sqlite3 for Node 18+
+        run: |
+          sed -i 's/"sqlite3": "4.0.0"/"sqlite3": "5.1.7"/' package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: npm audit (advisory)
+        run: npm audit --audit-level=high || true
+
+      - name: Start test app
+        run: node test/app.js &
+        env:
+          NODE_ENV: test
+
+      - name: Wait for test app
+        run: |
+          for i in $(seq 1 20); do
+            curl -s http://localhost:3001/health > /dev/null && echo "ready" && exit 0
+            sleep 0.5
+          done
+          echo "timeout" && exit 1
+
+      - name: Run test suite
+        run: bash test/test-wate.sh

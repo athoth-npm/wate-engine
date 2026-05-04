@@ -1,0 +1,23 @@
+/**
+ * \file      (WaTE) error.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      21/03/2026
+ * \version   1.0.0
+ * \brief     Layout minimal par défaut pour la page d'erreur.
+ *            Peut être surchargé par un error.css dans le répertoire css/ de l'application.
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: #001633;
+  font-family: Verdana, Arial, sans-serif;
+}
+
+/* (WaTE) error.css v1.0.0 */

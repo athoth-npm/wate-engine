@@ -1,0 +1,21 @@
+# Node 4 (engine >=4.6.1). Accepté ANALYSIS v7 #44 (EOL connu, migration future).
+FROM node:4.9.1
+
+WORKDIR /usr/src/app
+
+COPY package.json ./
+
+# FIX v3.19.4 #47: strict-ssl retiré (MITM possible). Utiliser un registry de confiance.
+RUN npm install --production
+
+COPY . .
+
+EXPOSE 3011
+
+# FIX v3.19.4 #52: healthcheck Express /health (module db chargé)
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD node -e "require('http').get('http://localhost:3011/health',function(r){process.exit(r.statusCode===200?0:1)})"
+
+# FIX v3.19.4 #56: non-root
+USER node
+
+CMD ["node", "engine.js", "--name", "WaTE", "--log", "63", "--port", "3011", "--path", "./", "--db", "app.db", "--mod", "auth,db"]

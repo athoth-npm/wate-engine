@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<!--
+  (WaTE) web/custom/_demo.html v1.3.0
+  Page de prototypage des custom elements de la doc WaTE.
+  Servie par Express via `node web/app.js` à http://localhost:3006/custom/_demo.html
+  (l'ordre des express.static fait que web/custom/* a priorité sur engine/custom/*).
+
+  Reprend l'habillage du site : common.css, header WaTE + nav, footer sticky.
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WaTE — démo custom elements doc</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <script type="module" src="/custom/custom.js"></script>
+  <script type="module" src="/custom/wate-stack/def.js"></script>
+  <script type="module" src="/custom/wate-flow/def.js"></script>
+  <script type="module" src="/custom/wate-tree/def.js"></script>
+  <style>
+    /* Styles spécifiques à la page démo — dans la même charte que les autres
+       pages du site (cartes blanches sur fond bleu-gris, titres navy avec
+       liseré orange en bas, comme dans docs.css). */
+    .demo-intro {
+      padding: 1.5em 0 0.5em;
+    }
+    .demo-intro h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--wate-navy);
+      letter-spacing: -0.02em;
+      margin: 0 0 0.4em;
+    }
+    .demo-intro p {
+      color: var(--text-muted);
+      max-width: 50em;
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .demo-case {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.2em, 3vw, 1.8em);
+      box-shadow: var(--shadow-sm);
+      margin-top: 1.4em;
+    }
+    .demo-case h2 {
+      font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+      font-weight: 700;
+      color: var(--wate-navy);
+      margin: 0 0 0.3em;
+    }
+    .demo-case > p {
+      color: var(--text-muted);
+      margin: 0 0 1.1em;
+      font-size: 0.93em;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <button type="button" class="site-brand" id="site-about-trigger">
+      <span class="site-brand-mark">WaTE</span>
+      <span class="site-brand-sub">Web as Table Engine</span>
+    </button>
+    <template id="site-about-tpl">
+      <p><strong>Web as Table Engine</strong></p>
+      <p>Moteur CMS Node.js / Express / SQLite piloté par base de données. Pages, menus et permissions vivent dans la DB — le code reste générique et minimal.</p>
+      <ul>
+        <li>Auteur : Romain Légault</li>
+        <li>Contact : <a href="mailto:rlegault@wate.fr">rlegault@wate.fr</a></li>
+        <li>Dépôt : <a href="https://github.com/athoth-npm/wate-engine" target="_blank" rel="noopener">github.com/athoth-npm/wate-engine</a></li>
+        <li>Site : <a href="https://www.wate.fr" target="_blank" rel="noopener">www.wate.fr</a></li>
+        <li>Licence : MIT — © 2023-2026 WATE Team</li>
+      </ul>
+    </template>
+    <script type="module">
+      import '/custom/modal-popup/def.js'
+      document.getElementById('site-about-trigger').addEventListener('click', function() {
+        window.wateModal.about({
+          title: 'À propos de WaTE',
+          html:  document.getElementById('site-about-tpl').innerHTML
+        })
+      })
+    </script>
+    <details class="site-nav-toggle">
+      <summary aria-label="Menu">
+        <span></span><span></span><span></span>
+      </summary>
+      <nav class="site-nav">
+        <a href="/">Accueil</a>
+        <a href="/docs">Documentation</a>
+        <a href="/examples">Exemples</a>
+        <a href="https://www.wate.fr" target="_blank" rel="noopener">Démo live</a>
+        <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </details>
+  </header>
+
+  <main class="site-main">
+
+    <section class="demo-intro">
+      <h1>Démo custom elements doc</h1>
+      <p>
+        Prototypage isolé des éléments réutilisables par la documentation WaTE.
+        Étapes 1/3 : <code>&lt;wate-stack&gt;</code> — schéma de couches/composants.<br>
+        Étape 2/3 : <code>&lt;wate-flow&gt;</code> — diagramme de flux d'étapes.<br>
+        Étape 3/3 : <code>&lt;wate-tree&gt;</code> — arbre de fichiers.
+      </p>
+    </section>
+
+    <section class="demo-case">
+      <h2>1. Stack verticale, mix des 3 tons, avec titre</h2>
+      <p>Cas typique : illustration de la pile WaTE en 4 couches.</p>
+      <wate-stack title="Pile WaTE" orientation="vertical">
+        <wate-stack-box label="Client"      sub="HTML + custom elements natifs" tone="muted"></wate-stack-box>
+        <wate-stack-box label="Express"     sub="Routing + middleware"          tone="navy"></wate-stack-box>
+        <wate-stack-box label="Moteur WaTE" sub="_core, _data, _auth, _db..."   tone="orange"></wate-stack-box>
+        <wate-stack-box label="SQLite"      sub="Un fichier .db, embarqué"      tone="navy"></wate-stack-box>
+      </wate-stack>
+    </section>
+
+    <section class="demo-case">
+      <h2>2. Stack horizontale, sans titre, sans sub</h2>
+      <p>Cas compact : labels sans sub (pas d'espace fantôme), pas de titre. Mobile : doit retomber en colonne sous 720px.</p>
+      <wate-stack orientation="horizontal">
+        <wate-stack-box label="Auth"  tone="navy"></wate-stack-box>
+        <wate-stack-box label="DB"    tone="navy"></wate-stack-box>
+        <wate-stack-box label="Stats" tone="navy"></wate-stack-box>
+        <wate-stack-box label="Mail"  tone="muted"></wate-stack-box>
+      </wate-stack>
+    </section>
+
+    <section class="demo-case">
+      <h2>3. Une seule boîte (cas limite)</h2>
+      <p>Une boîte isolée doit s'afficher proprement, sans gap superflu.</p>
+      <wate-stack title="Configuration minimale">
+        <wate-stack-box label="engine.init({ db: ':memory:' })" sub="Tout ce qu'il faut pour démarrer" tone="orange"></wate-stack-box>
+      </wate-stack>
+    </section>
+
+    <section class="demo-case">
+      <h2>4. Stack vide (dégradation)</h2>
+      <p>Une stack sans enfants ne doit pas crasher — juste un titre éventuel et un conteneur vide.</p>
+      <wate-stack title="Vide volontairement"></wate-stack>
+    </section>
+
+    <section class="demo-case">
+      <h2>5. Stack horizontale en 2 boîtes orange/navy (mise en évidence)</h2>
+      <p>Vérifie que les bordures et la hauteur s'égalisent entre tons différents.</p>
+      <wate-stack title="Singleton vs per-instance" orientation="horizontal">
+        <wate-stack-box label="_core.js" sub="Singleton — partagé par require() entre toutes les instances Express" tone="orange"></wate-stack-box>
+        <wate-stack-box label="app.locals" sub="Per-instance — propre à chaque init(), nécessaire pour les tests multi-instance" tone="navy"></wate-stack-box>
+      </wate-stack>
+    </section>
+
+    <section class="demo-case">
+      <h2>6. Flow horizontal — cycle d'une requête WaTE</h2>
+      <p>Cas typique : suite d'étapes avec note. Flèches → entre étapes ; bascule en ↓ sous 720px.</p>
+      <wate-flow title="Cycle d'une requête" orientation="horizontal">
+        <wate-flow-step label="GET /url"   note="Express reçoit"></wate-flow-step>
+        <wate-flow-step label="_page"      note="URL → list_id"></wate-flow-step>
+        <wate-flow-step label="_item"      note="template, css, queries"></wate-flow-step>
+        <wate-flow-step label="_glossary"  note="Textes i18n"></wate-flow-step>
+        <wate-flow-step label="EJS"        note="Rendu serveur"></wate-flow-step>
+      </wate-flow>
+    </section>
+
+    <section class="demo-case">
+      <h2>7. Flow vertical — étapes longues</h2>
+      <p>Orientation verticale forcée. Numérotation auto, flèches ↓ entre étapes, masquée sur la dernière.</p>
+      <wate-flow title="Flux d'authentification" orientation="vertical">
+        <wate-flow-step label="POST /signin"        note="Email + mot de passe"></wate-flow-step>
+        <wate-flow-step label="Vérification PBKDF2" note="Comparaison du hash stocké"></wate-flow-step>
+        <wate-flow-step label="Création session"    note="Insert dans _session, cookie HttpOnly"></wate-flow-step>
+        <wate-flow-step label="Redirection /admin"  note="Profil résolu, accès accordé"></wate-flow-step>
+      </wate-flow>
+    </section>
+
+    <section class="demo-case">
+      <h2>8. Flow sans titre, sans note (cas minimal)</h2>
+      <p>Vérifie absence d'espace fantôme quand titre et notes sont vides.</p>
+      <wate-flow orientation="horizontal">
+        <wate-flow-step label="Lire"></wate-flow-step>
+        <wate-flow-step label="Écrire"></wate-flow-step>
+        <wate-flow-step label="Tester"></wate-flow-step>
+      </wate-flow>
+    </section>
+
+    <section class="demo-case">
+      <h2>9. Flow à un seul step (cas limite)</h2>
+      <p>Un step isolé : pas de flèche après lui (data-last).</p>
+      <wate-flow title="Étape unique">
+        <wate-flow-step label="engine.init({ db: ':memory:' })" note="Tout en une ligne"></wate-flow-step>
+      </wate-flow>
+    </section>
+
+    <section class="demo-case">
+      <h2>10. Tree — structure d'un site WaTE</h2>
+      <p>Cas typique : arborescence d'un dossier avec notes explicatives sur certains fichiers.</p>
+      <wate-tree title="Arborescence d'un site WaTE" data='[
+        {"name":"web","type":"dir","note":"racine de l’application","children":[
+          {"name":"app.js","type":"file","note":"point d’entrée — engine.init()"},
+          {"name":"site.db","type":"file","note":"recréée à chaque démarrage"},
+          {"name":"migrations","type":"dir","children":[
+            {"name":"001_site.sql","type":"file","note":"pages, glossaire, profils"},
+            {"name":"002_docs.sql","type":"file"}
+          ]},
+          {"name":"views","type":"dir","note":"templates EJS","children":[
+            {"name":"common.ejs","type":"file","note":"layout maître"},
+            {"name":"site-home.ejs","type":"file"},
+            {"name":"site-docs.ejs","type":"file"}
+          ]},
+          {"name":"custom","type":"dir","note":"web components","children":[
+            {"name":"wate-card","type":"dir","children":[
+              {"name":"def.js","type":"file"},
+              {"name":"def.css","type":"file"}
+            ]}
+          ]},
+          {"name":"css","type":"dir","children":[
+            {"name":"common.css","type":"file"},
+            {"name":"docs.css","type":"file"}
+          ]}
+        ]}
+      ]'></wate-tree>
+    </section>
+
+    <section class="demo-case">
+      <h2>11. Tree plat — sans children</h2>
+      <p>Liste simple à un niveau, sans imbrication.</p>
+      <wate-tree title="Modules optionnels du moteur" data='[
+        {"name":"_auth.js","type":"file","note":"sessions, signup, signin"},
+        {"name":"_db.js","type":"file","note":"CRUD générique par table"},
+        {"name":"_stats.js","type":"file","note":"compteur de vues"},
+        {"name":"_mail.js","type":"file","note":"reset password (optionnel)"}
+      ]'></wate-tree>
+    </section>
+
+    <section class="demo-case">
+      <h2>12. Tree sans titre, dossier vide (cas limite)</h2>
+      <p>Vérifie absence de figcaption fantôme et qu'un dossier sans children n'affiche pas de sous-liste.</p>
+      <wate-tree data='[
+        {"name":"empty-dir","type":"dir"},
+        {"name":"lone-file.txt","type":"file"}
+      ]'></wate-tree>
+    </section>
+
+    <section class="demo-case">
+      <h2>13. Tree avec JSON invalide (dégradation)</h2>
+      <p>Doit afficher un message d'erreur lisible, pas crasher. Voir aussi la console pour le détail.</p>
+      <wate-tree title="Cas d'erreur" data='[{"name": broken json}]'></wate-tree>
+    </section>
+
+    <section class="demo-case">
+      <h2>14. Tree sans attribut data (dégradation)</h2>
+      <p>Doit signaler l'attribut manquant.</p>
+      <wate-tree title="Sans data"></wate-tree>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer-tagline">Le CMS piloté par la donnée.</p>
+    <p class="site-footer-copy">&copy; 2023-2026 <a href="mailto:rlegault@wate.fr">Romain Légault</a></p>
+  </footer>
+
+</body>
+</html>
+<!-- (WaTE) web/custom/_demo.html v1.3.0 -->

@@ -1,0 +1,33 @@
+/**
+ * \file      (WaTE) css/admin-auth.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   1.5.2
+ * \brief     Style light DOM des pages d'authentification admin WaTE.
+ *
+ * \details   Chargé uniquement en light DOM (via <link> dans common.ejs).
+ *            Les règles shadow (panel, .form-row, inputs, .form-actions, submit)
+ *            sont dans custom/admin-row/def.css via :host([mode=form]).
+ *
+ *            Complète common.css (h2, a déjà définis).
+ *            Surchargeable : placer css/admin-auth.css dans le répertoire de l'application.
+ *
+ *            v1.0.0 : version initiale.
+ *            v1.1.0 : nettoyage — suppression des règles migrées dans common.css.
+ *            v1.2.0 : table/td remplacés par .form-row (flexbox) — <admin-row> shadow DOM.
+ *                     .auth-panel remplace la règle form {} pour ne pas affecter le
+ *                     formulaire signout (light DOM). Champ select retiré (custom elements).
+ *            v1.3.0 : panel + .form-row + inputs + .form-actions + submit migrés dans
+ *                     custom/admin-row/def.css (:host([mode=form])). Ce fichier ne contient
+ *                     plus que les règles light DOM : p.error et button (signout).
+ *            v1.4.0 : correction de la version (v1.3.0 était le plan, v1.4.0 l'applique).
+ *            v1.5.0 : p.info — message server-side positif (req.query.info).
+ */
+
+/* ── Erreur server-side (light DOM — req.query.error) ───────────────────── */
+
+p.error { color: var(--wate-error); }
+p.info  { color: #80ffa0; }
+
+/* (WaTE) css/admin-auth.css v1.5.2 */

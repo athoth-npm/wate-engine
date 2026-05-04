@@ -1,0 +1,165 @@
+/**
+ * \file      (WaTE) custom/admin-row/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      01/09/2025
+ * \version   1.5.1
+ * \brief     Style shadow DOM du custom element <admin-row>.
+ *
+ * \details   Variables CSS locales sur :host — surchargeables par l'application.
+ *
+ *            v1.0.0 : version initiale.
+ *            v1.1.0 : simplification des règles redondantes.
+ *            v1.2.0 : .pk-val — style grisé pour les champs AUTOINCREMENT.
+ *            v1.3.0 : mode="form" — panel border, .form-row, inputs, .form-actions.
+ *            v1.4.0 : padding migré de :host([mode=form]) vers form (display:block).
+ *            v1.5.0 : couleurs et dégradés migrés en custom properties sur :host.
+ */
+
+:host {
+  display: table-row;
+
+  --ar-border:       var(--wate-border, #aaa);
+  --ar-radius:       var(--wate-radius, 4px);
+  --ar-bg:           var(--wate-bg, #fff);
+  --ar-disabled:     var(--wate-bg-disabled, #f0f0f0);
+  --ar-orange:       var(--wate-orange, #f0a500);
+  --ar-text-light:   var(--wate-text, #c8ddf0);
+  --ar-marine-dk:    var(--wate-marine-dk, #001633);
+  --ar-shadow:       var(--wate-shadow, 1px 1px 2px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.5));
+  --ar-btn-cancel:   var(--wate-btn-cancel, linear-gradient(to bottom, #e8e8e8, #c0c0c0));
+  --ar-btn-cancel-h: var(--wate-btn-cancel-h, linear-gradient(to bottom, #d8d8d8, #b0b0b0));
+  --ar-btn-ok:       var(--wate-btn-ok, linear-gradient(to bottom, #f0b030, #c88000));
+  --ar-btn-ok-h:     var(--wate-btn-ok-h, linear-gradient(to bottom, #ffd060, #e09010));
+}
+
+form  { display: contents; }
+
+.admin-col, .admin-col-btn { display: table-cell; padding: 2px 4px; vertical-align: middle; }
+.admin-col-btn { text-align: center; white-space: nowrap; }
+
+.admin-col input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ar-border);
+  border-radius: var(--ar-radius);
+  padding: 2px 4px;
+  font-size: 0.833rem;
+  background: var(--ar-bg);
+  color: #000;
+}
+
+.admin-col input[type=text]:read-only { background: var(--ar-disabled); color: #666; border-color: #ccc; }
+
+.pk-val {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.833rem;
+  background: #f0f0f0;
+  color: #999;
+  font-style: italic;
+}
+
+.admin-col > *[name] { display: block; width: 100%; }
+
+button {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 3px 7px;
+  border: 1px solid #777;
+  background: var(--ar-btn-cancel);
+  box-shadow: var(--ar-shadow);
+  font-size: 0.833rem;
+  color: #222;
+}
+
+button:hover           { background: var(--ar-btn-cancel-h); }
+button:active          { box-shadow: inset 1px 1px 3px rgba(0,0,0,.4); transform: translateY(1px); }
+button:disabled        { background: #d0d0d0; color: #999; border-color: #bbb; box-shadow: none; cursor: default; opacity: 0.5; }
+
+/* ── Mode formulaire (mode="form") ───────────────────────────────────────── */
+
+:host([mode=form]) {
+  display: block;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid var(--ar-orange);
+  border-radius: 10px;
+  min-width: 280px; max-width: 100%;
+}
+
+:host([mode=form]) form { display: block; padding: 1.5em 2em; }
+
+:host([mode=form]) p.error { color: var(--wate-error, #ff8080); margin: 0 0 0.4em; }
+
+:host([mode=form]) .form-row {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin: 3px 0;
+}
+
+:host([mode=form]) .form-row label {
+  flex: 0 0 8em;
+  text-align: right;
+  color: var(--ar-text-light);
+  font-size: 0.833rem;
+  white-space: nowrap;
+}
+
+:host([mode=form]) .form-row > *:not(label) { flex: 1; }
+
+:host([mode=form]) input[type=text],
+:host([mode=form]) input[type=email],
+:host([mode=form]) input[type=password] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ar-border);
+  border-radius: var(--ar-radius);
+  padding: 4px 6px;
+  font-size: 0.833rem;
+  background: var(--ar-bg);
+  color: #000;
+}
+
+:host([mode=form]) input[type=email]:read-only,
+:host([mode=form]) input[type=text]:read-only {
+  background: var(--ar-disabled);
+  color: #666;
+  border-color: #ccc;
+  cursor: default;
+}
+
+:host([mode=form]) small { color: #9ab; font-size: 0.667rem; }
+
+:host([mode=form]) .form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.6em;
+}
+
+:host([mode=form]) input[type=submit] {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 5px 16px;
+  border: 1px solid #a06000;
+  background: var(--ar-btn-ok);
+  box-shadow: var(--ar-shadow);
+  font-size: 0.833rem;
+  font-weight: bold;
+  color: var(--ar-marine-dk);
+}
+
+:host([mode=form]) input[type=submit]:hover  { background: var(--ar-btn-ok-h); }
+:host([mode=form]) input[type=submit]:active { box-shadow: inset 1px 1px 3px rgba(0,0,0,.4); transform: translateY(1px); }
+:host([mode=form]) input[type=submit]:disabled { opacity: 0.5; cursor: default; }
+
+:host([mode=form]) a         { color: var(--ar-orange); font-size: 0.833rem; }
+:host([mode=form]) a:hover   { color: #ffd060; }
+:host([mode=form]) a:visited { color: #c07000; }
+
+/* (WaTE) custom/admin-row/def.css v1.5.1 */

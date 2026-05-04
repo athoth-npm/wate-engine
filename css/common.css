@@ -1,0 +1,183 @@
+/**
+ * \file      (WaTE) css/common.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      01/09/2025
+ * \version   2.5.3
+ * \brief     Charte graphique et layout WaTE pour toutes les pages d'administration.
+ *
+ * \details   Importé par common.ejs via <link rel="stylesheet" href="/css/common.css">.
+ *            Les CSS spécifiques (admin-auth.css, admin-db.css) viennent en complément.
+ *            v2.5.2 : background-color et sizing restaures directement (plus
+ *            de dépendance @import error.css).
+ *
+ *            v1.0.0 : version initiale.
+ *            v2.0.0 : nettoyage complet — suppression des blocs commentés obsolètes.
+ *                     Ajout .header-user (email + profil dans l'entête).
+ *                     Règles partagées extraites de admin-auth.css : h2, a, p.nav-info.
+ *            v2.1.0 : logo → <icon-menu> : header > img supprimé, header > icon-menu ajouté.
+ *                     .header-right regroupe globe + header-user à droite (flex, margin-left:auto).
+ *            v2.2.0 : logo → <img> statique (height 48px) ; hamburger <icon-menu> pour la nav.
+ *            v2.3.0 : a:visited #c07000 — orange foncé cohérent avec a (#f0a500).
+ *            v2.4.0 : .wate-logo-btn — logo WaTE cliquable (ouvre modal À propos).
+ *                     .about-* : styles du contenu du modal « À propos ».
+ *            v2.4.1 : reset explicite box-shadow/background/transform sur .wate-logo-btn
+ *                     pour neutraliser l'héritage des button page-level (admin-*.css).
+ *            v2.5.1 : @import error.css retiré (reset global ne fuit plus).
+ *                     Button unifié + focus-visible.
+ *            v2.5.2 : FIX restaure background-color #001633, font-family,
+ *                     et height: 100% sur html/body — perdus avec le @import.
+ *            v2.5.3 : Variables --wate-* utilisées dans les règles (plus de
+ *                     couleurs hardcodées). Ajout --wate-error + box-sizing
+ *                     border-box global.
+ *            v2.5.0 : variables CSS --wate-* sur :root — thème centralisé pour tous
+ *                     les custom elements. Chaque def.css référence var(--wate-*, fallback).
+ */
+
+/* ── Thème WaTE (centralisé) ──────────────────────────────────────────────── */
+
+:root {
+  --wate-orange:       #f0a500;
+  --wate-orange-dk:    #c88000;
+  --wate-orange-l:     rgba(240, 165, 0, .3);
+  --wate-marine:       #002147;
+  --wate-marine-dk:    #001633;
+  --wate-text:         #c8ddf0;
+  --wate-text-muted:   #8ab;
+  --wate-bg:           #fff;
+  --wate-bg-disabled:  #f0f0f0;
+  --wate-border:       #aaa;
+  --wate-error:        #ff8080;
+  --wate-radius:       4px;
+  --wate-shadow:       1px 1px 2px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  --wate-btn-cancel:   linear-gradient(to bottom, #e8e8e8, #c0c0c0);
+  --wate-btn-cancel-h: linear-gradient(to bottom, #d8d8d8, #b0b0b0);
+  --wate-btn-ok:       linear-gradient(to bottom, #f0b030, #c88000);
+  --wate-btn-ok-h:     linear-gradient(to bottom, #ffd060, #e09010);
+}
+
+/* ── Reset box-sizing ────────────────────────────────────────────────────── */
+/* FIX v2.5.3: box-sizing:border-box global (cohérent avec la vitrine). */
+*, *::before, *::after { box-sizing: border-box; }
+button { cursor: pointer; border-radius: var(--wate-radius); padding: 4px 10px; border: 1px solid var(--wate-border); background: var(--wate-btn-cancel); box-shadow: 1px 1px 2px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.6); font-size: 0.833rem; color: #222; }
+button:hover            { background: var(--wate-btn-cancel-h); }
+button:active           { box-shadow: inset 1px 1px 3px rgba(0,0,0,.4); transform: translateY(1px); }
+button:focus-visible    { outline: 2px solid var(--wate-orange); outline-offset: 2px; }
+button:disabled         { background: #d0d0d0; color: #999; border-color: #bbb; box-shadow: none; cursor: default; opacity: 0.5; }
+
+/* ── Reset & fond de page ─────────────────────────────────────────────────── */
+/* FIX v2.5.2: après retrait @import "error.css" (v2.5.1), restaurer fond,
+   police et centrage vertical sans la fuite du reset global * {} */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--wate-marine-dk);
+  font-family: Verdana, Arial, sans-serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+header {
+  border-bottom: 3px solid var(--wate-orange);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+
+.wate-logo-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 4px 0 10px;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.wate-logo-btn:hover,
+.wate-logo-btn:active         { background: none; box-shadow: none; transform: none; }
+.wate-logo-btn img            { height: 48px; display: block; padding: 0; }
+.wate-logo-btn:hover img      { filter: drop-shadow(0 0 4px var(--wate-orange)); }
+.wate-logo-btn:focus-visible  { outline: 2px solid var(--wate-orange); outline-offset: 2px; border-radius: var(--wate-radius); }
+
+/* ── Modal « À propos » ──────────────────────────────────────────────────── */
+
+.about-version { color: var(--wate-orange); font-size: 1rem; }
+.about-copy    { color: var(--wate-text-muted); font-size: 0.75rem; margin-top: -0.4em; }
+.about-intro   { color: var(--wate-text); }
+.about-features li { color: var(--wate-text); }
+.about-link    { text-align: right; }
+
+h1 { font-size: 1.5em; }
+h2 { color: var(--wate-text); margin-bottom: 0.6em; font-size: 1.1em; }
+
+/* ── Droite de l'entête : globe langue + user connecté ───────────────────── */
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-right: 0.5em;
+  gap: 4px;
+}
+
+.header-user {
+  padding-right: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.4;
+}
+
+.header-email  { color: var(--wate-orange); font-size: 0.833rem; font-weight: bold; }
+.header-profil { color: var(--wate-text-muted); font-size: 0.667rem; }
+
+/* ── Barre de recherche ─────────────────────────────────────────────────── */
+.header-search { position: relative; margin: 0 1em; flex: 1; max-width: 280px; }
+.header-search input { width: 100%; padding: 0.35em 0.6em; border: 1px solid #3a5070; border-radius: var(--wate-radius); background: #0e2840; color: #e0e8f0; font-size: 0.75rem; font-family: inherit; outline: none; }
+.header-search input:focus { border-color: var(--wate-orange); box-shadow: 0 0 0 2px rgba(240,165,0,0.2); }
+.header-search input::placeholder { color: #7a8ea0; }
+.header-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #122840; border: 1px solid #444; border-radius: 0 0 var(--wate-radius) var(--wate-radius); max-height: 300px; overflow-y: auto; z-index: 100; }
+.header-search-result { display: block; padding: 0.4em 0.7em; color: var(--wate-text); font-size: 0.667rem; text-decoration: none; border-bottom: 1px solid #2a4058; }
+.header-search-result:hover { background: #1e3c5a; color: #fff; }
+.header-search-result .src { display: block; font-size: 0.583rem; color: #7a8ea0; margin-top: 0.15em; }
+.header-search-result mark { color: var(--wate-orange); background: transparent; font-weight: 700; }
+
+/* ── Main ────────────────────────────────────────────────────────────────── */
+
+main {
+  background-color: var(--wate-marine);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2em 1em;
+  overflow-y: auto;
+}
+
+a          { color: var(--wate-orange); }
+a:hover    { color: #ffd060; }
+a:visited  { color: #c07000; }
+.nav-info { color: var(--wate-text); font-size: 0.792rem; margin: 1em 0 0.8em; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+footer {
+  flex-shrink: 0;
+  background-color: var(--wate-marine-dk);
+  border-top: 3px solid var(--wate-orange);
+  padding: 15px;
+  text-align: center;
+}
+
+/* (WaTE) css/common.css v2.5.3 */

@@ -1,0 +1,210 @@
+/**
+ * \file      (WaTE) web/custom/wate-flow/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-25
+ * \version   1.0.0
+ * \brief     Styles shadow DOM des custom elements <wate-flow> et <wate-flow-step>.
+ *
+ * \details   Une seule feuille pour les deux éléments — les sélecteurs .flow et .step
+ *            les distinguent. Variables CSS regroupées sur :host pour homogénéité
+ *            avec <wate-stack>.
+ *
+ *            Flèches via pseudo-élément ::after sur :host(wate-flow-step) — pas de
+ *            SVG. → en horizontal, ↓ en vertical (et en mobile pour l'horizontal qui
+ *            retombe en colonne).
+ */
+
+:host {
+  display: block;
+  --wf-navy:   #002147;
+  --wf-orange: #f0a500;
+  --wf-cream:  #fff4dc;
+  --wf-text:   #1a2332;
+  --wf-muted:  #5a6a7e;
+  --wf-bg:     #ffffff;
+  --wf-border: var(--border);
+}
+
+/* ── <wate-flow> ──────────────────────────────────────────────────── */
+.flow {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.flow-title {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wf-muted);
+  padding: 0 0.2em;
+}
+.flow-title:empty {
+  display: none;
+}
+
+.flow-inner {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  align-items: stretch;
+}
+
+.flow[data-orientation="horizontal"] .flow-inner {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.6em;
+  flex-wrap: wrap;
+}
+.flow[data-orientation="horizontal"] .flow-inner > ::slotted(wate-flow-step) {
+  flex: 1 1 0;
+  min-width: 9em;
+  display: flex;
+}
+
+@media (max-width: 720px) {
+  .flow[data-orientation="horizontal"] .flow-inner {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+}
+
+/* ── <wate-flow-step> ─────────────────────────────────────────────── */
+:host(wate-flow-step) {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+/* Flèche entre étapes — pseudo-élément ::after sur l'élément hôte.
+   Pose : ↓ en dessous quand orientation verticale (réserve padding-bottom),
+          → à droite quand orientation horizontale (réserve padding-right).
+   Masquée si :host([data-last]) — pas de flèche après la dernière étape.
+   En mobile (<720px), un horizontal retombe en vertical : on rebascule la
+   flèche en ↓ via @media plus bas. */
+
+/* Vertical (par défaut si l'attribut manque) — flèche ↓ sous la boîte */
+:host(wate-flow-step) {
+  padding-bottom: 1.6em;
+}
+:host(wate-flow-step)::after {
+  content: '↓';
+  position: absolute;
+  bottom: 0.05em;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--wf-orange);
+  font-size: 1.2em;
+  line-height: 1;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Horizontal — flèche → à droite de la boîte */
+:host(wate-flow-step[data-orientation="horizontal"]) {
+  padding-bottom: 0;
+  padding-right: 1.6em;
+}
+:host(wate-flow-step[data-orientation="horizontal"])::after {
+  content: '→';
+  bottom: auto;
+  left: auto;
+  right: 0.1em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Pas de flèche après la dernière étape */
+:host(wate-flow-step[data-last])::after {
+  display: none;
+}
+:host(wate-flow-step[data-last]) {
+  padding-bottom: 0;
+  padding-right: 0;
+}
+
+/* Mobile : un flow horizontal retombe en colonne (cf. @media plus bas sur
+   .flow[data-orientation="horizontal"]) — la flèche doit redevenir ↓ */
+@media (max-width: 720px) {
+  :host(wate-flow-step[data-orientation="horizontal"]) {
+    padding-bottom: 1.6em;
+    padding-right: 0;
+  }
+  :host(wate-flow-step[data-orientation="horizontal"])::after {
+    content: '↓';
+    bottom: 0.05em;
+    left: 50%;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+  }
+  :host(wate-flow-step[data-orientation="horizontal"][data-last]) {
+    padding-bottom: 0;
+  }
+}
+
+/* La boîte step elle-même */
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+  padding: 0.75em 1em;
+  background: var(--wf-bg);
+  border: 2px solid var(--wf-border);
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.step:hover {
+  border-color: var(--wf-orange);
+}
+
+.step-num {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  background: var(--wf-orange);
+  color: var(--wf-navy);
+  font-weight: 800;
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  min-width: 0;
+}
+
+.step-label {
+  display: block;
+  font-weight: 700;
+  color: var(--wf-navy);
+  font-size: 0.98em;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.step-note {
+  display: block;
+  font-size: 0.82em;
+  color: var(--wf-muted);
+  line-height: 1.4;
+}
+.step-note:empty {
+  display: none;
+}
+
+/* (WaTE) web/custom/wate-flow/def.css v1.0.0 */

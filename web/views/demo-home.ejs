@@ -1,0 +1,86 @@
+<%
+/**
+ * \file      (WaTE) web/views/demo-home.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.2.0
+ * \brief     Fragment page /demo — accueil de la démo « gestion de stock ».
+ *
+ * \details   Page accessible au profil anonymous. Présente les deux rôles
+ *            disponibles (owner démo, gestionnaire) et permet au visiteur
+ *            de se connecter en posant un cookie de session pré-créée.
+ *
+ *            Si le visiteur est déjà connecté (cookie session présent et
+ *            profil 10 ou 11), on lui propose de continuer vers /demo/stock
+ *            ou de se déconnecter.
+ */
+
+// Détection d'une session démo active. _data.serve a déjà résolu le profil
+// courant via le cookie ; on le récupère depuis le contexte de rendu.
+var inDemo = (profil_id === 10 || profil_id === 11)
+%>
+<section class="demo-hero">
+  <h1 class="demo-hero-title"><%=_gi(result, 'demo-hero-title')%></h1>
+  <p class="demo-hero-subtitle"><%=_gi(result, 'demo-hero-subtitle')%></p>
+  <% if (inDemo) { %>
+    <div class="demo-status">
+      <p><%=_gi(result, 'demo-already-in')%></p>
+      <div class="demo-cta">
+        <a class="btn btn-primary" href="/demo/stock"><%=_gi(result, 'demo-continue')%></a>
+        <a class="btn btn-ghost btn-action" href="/demo/api/logout"><%=_gi(result, 'demo-logout')%></a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="demo-cta">
+      <a class="btn btn-primary btn-action" href="/demo/api/login/owner"><%=_gi(result, 'demo-login-owner')%></a>
+      <a class="btn btn-ghost btn-action"   href="/demo/api/login/mgr"><%=_gi(result, 'demo-login-mgr')%></a>
+    </div>
+  <% } %>
+</section>
+
+<section class="demo-roles">
+  <h2 class="demo-roles-title"><%=_gi(result, 'demo-roles-title')%></h2>
+  <div class="demo-roles-grid">
+<%
+var roles = [
+  { h: _gi(result, 'demo-role-owner-h'), p: _gi(result, 'demo-role-owner-p') },
+  { h: _gi(result, 'demo-role-mgr-h'),   p: _gi(result, 'demo-role-mgr-p') }
+]
+%>
+    <% roles.forEach(function(r) { %>
+      <article class="demo-role">
+        <h3><%=r.h%></h3>
+        <p><%=r.p%></p>
+      </article>
+    <% }) %>
+  </div>
+</section>
+<%
+var _code = result.demoCode || {}
+%>
+
+<section class="demo-code">
+  <h2 class="demo-code-title"><%=_gi(result,'demo-code-title')%></h2>
+  <p class="demo-code-intro"><%-_gi(result,'demo-code-intro')%></p>
+
+  <pre class="demo-tree"><code><%=_gi(result,'demo-code-tree')%></code></pre>
+
+  <demo-code-block label="<%=_gi(result,'demo-code-app-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"      lang="js"  content="<%=_code.app%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-site-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"     lang="sql" content="<%=_code.site%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-access-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"   lang="sql" content="<%=_code.access%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-schema-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"   lang="sql" content="<%=_code.schema%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-seed-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"     lang="sql" content="<%=_code.seed%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-ai-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"        lang="sql" content="<%=_code.ai%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-module-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"   lang="js"  content="<%=_code.demo%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-stockjs-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"  lang="js"  content="<%=_code.stockjs%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-btnaction-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"lang="js"  content="<%=_code.btnaction%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-common-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"   lang="ejs" content="<%=_code.common%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-home-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"     lang="ejs" content="<%=_code.home%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-stock-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"    lang="ejs" content="<%=_code.stock%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-csscommon-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"lang="css" content="<%=_code.csscommon%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-admindb-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"  lang="css" content="<%=_code.admindb%>"></demo-code-block>
+  <demo-code-block label="<%=_gi(result,'demo-code-democss-label')%>" copylabel="<%=_gi(result,'copy-btn')%>"  lang="css" content="<%=_code.democss%>"></demo-code-block>
+</section>
+
+<%# (WaTE) web/views/demo-home.ejs v1.2.0 %>

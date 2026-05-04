@@ -1,0 +1,64 @@
+/**
+ * \file      (WaTE) web/custom/wate-card/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-24
+ * \version   1.0.0
+ * \brief     Styles du custom element <wate-card>.
+ */
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.card {
+  height: 100%;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.6em 1.4em;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  margin: 0;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--wate-orange);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--wate-navy) 0%, var(--wate-navy-soft) 100%);
+  color: var(--wate-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1em;
+}
+
+.card-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--wate-navy);
+  margin: 0 0 0.4em;
+  letter-spacing: -0.01em;
+}
+
+.card-body {
+  font-size: 0.97em;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* (WaTE) web/custom/wate-card/def.css v1.0.0 */

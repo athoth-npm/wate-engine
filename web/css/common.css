@@ -1,0 +1,421 @@
+/**
+ * \file      (WaTE) web/css/common.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.5.2
+ * \brief     Charte graphique du site vitrine WaTE — mobile-first, zéro dépendance.
+ *
+ * \details   Reprend les couleurs WaTE (#002147 marine / #f0a500 orange)
+ *            mais les adoucit pour un rendu "site public" : fond clair,
+ *            typographie system-ui fluide (clamp), cartes aérées,
+ *            boutons modernes avec transitions discrètes.
+ *
+ *            Breakpoint unique à 720px — au-dessus, la nav devient horizontale
+ *            et les cartes passent en grille 3 colonnes.
+ *
+ *            v1.1.0 : ajout du bloc « Skin vitrine du <modal-popup> ».
+ *            v1.2.0 : <icon-menu class="site-lang"> dans le header.
+ *            v1.4.2 : burger migré vers <icon-menu class="site-burger">,
+ *                     wrapper .site-header-right, retrait justify-content
+ *                     space-between, burger toujours visible ≥720px.
+ *            v1.5.0 : +13 variables (--code-*, --success-*, --orange-light,
+ *                     --transition, --radius-sm, --border-soft).
+ *                     Alias --wate-* pour composants admin moteur en thème
+ *                     clair. Reset button { font-family:inherit }. Skin
+ *                     <modal-popup> : OK button orange. .wate-logo-btn.
+ *            v1.5.1 : modal-popup logo via --mp-icon-src + about modal
+ *                     calé sur le modèle admin (about-*).
+ *            v1.5.2 : nettoyage double déclaration --wate-orange/--wate-orange-dk.
+ */
+
+/* ── Variables ─────────────────────────────────────────────────────── */
+:root {
+  --wate-navy:       #002147;
+  --wate-navy-soft:  #0b3a6b;
+  --wate-orange:     #f0a500;
+  --wate-orange-dk:  #c88800;
+
+  --bg:         #eef2f7;    /* corps : bleu-gris doux (distinct du chrome blanc) */
+  --bg-elev:    #ffffff;    /* cartes / preview : blanc pur */
+  --bg-chrome:  #ffffff;    /* header/footer : blanc pur pour ressortir sur corps teinté */
+  --text:       #1a2332;
+  --text-muted: #5a6a7e;
+  --border:     #dbe3ec;    /* bordure contrastée pour séparer chrome/corps */
+
+  --radius:     10px;
+  --radius-lg:  16px;
+  --shadow-sm:  0 1px 3px rgba(0, 33, 71, 0.06), 0 1px 2px rgba(0, 33, 71, 0.04);
+  --shadow-md:  0 4px 12px rgba(0, 33, 71, 0.08), 0 2px 4px rgba(0, 33, 71, 0.04);
+  --shadow-lg:  0 12px 32px rgba(0, 33, 71, 0.12), 0 4px 8px rgba(0, 33, 71, 0.06);
+
+  --font:       -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:  ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --max-w:      1180px;
+
+  /* Alias pour les composants admin moteur (schema-table, admin-row, admin-list)
+     utilisés dans la démo — valeurs du thème clair vitrine. */
+  --wate-marine:       var(--bg-elev);
+  --wate-marine-dk:    var(--bg);
+  --wate-text:         var(--text);
+  --wate-text-muted:   var(--text-muted);
+  --wate-bg:           var(--bg-elev);
+  --wate-bg-disabled:  #f0f0f0;
+  --wate-border:       var(--border);
+  --wate-radius:       var(--radius);
+  --wate-shadow:       var(--shadow-sm);
+  --wate-orange-l:     var(--orange-light);
+  --wate-btn-cancel:   transparent;
+  --wate-btn-cancel-h: var(--bg);
+  --wate-btn-ok:       linear-gradient(to bottom, #f0b030, #c88000);
+  --wate-btn-ok-h:     linear-gradient(to bottom, #ffd060, #e09010);
+
+  --code-bg:        #001633;
+  --code-color:     #e3ecf5;
+  --orange-light:   #fff4dc;
+  --success-bg:     #e8f5ee;
+  --success-color:  #1a7f3f;
+  --success-border: #b6dec5;
+  --preview-bar-bg: #f1f4f8;
+  --link-color:     #1668b0;
+  --tree-bg:        #fafbfd;
+  --tree-line:      #d3dae3;
+  --transition:     0.15s ease;
+  --radius-sm:      6px;
+  --border-soft:    #e3e8ee;
+}
+
+/* ── Reset minimal ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box }
+html { -webkit-text-size-adjust: 100% }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: clamp(15px, 2.5vw, 17px);
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+img { max-width: 100%; display: block }
+a   { color: var(--wate-navy); text-decoration: none }
+a:hover { color: var(--wate-orange) }
+
+/* ── Header + nav ──────────────────────────────────────────────────── */
+/* Body devient flex-column pour que le footer se colle en bas quand le
+   contenu est court (pas de grand espace blanc sous un hero court). */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  /* Pas de justify-content: space-between — il forcerait le burger au milieu
+     entre le brand et la langue. Les éléments à droite sont poussés via
+     `margin-left: auto` sur le premier d'entre eux (.site-burger). */
+  padding: 0.8em 1em;
+  background: var(--bg-chrome);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.site-brand:hover .site-brand-mark { color: var(--wate-orange) }
+.site-brand:focus { outline: 2px solid var(--wate-orange); outline-offset: 4px; border-radius: 4px }
+.site-brand-mark {
+  font-weight: 800;
+  font-size: clamp(1.3rem, 4vw, 1.6rem);
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+}
+.site-brand-sub {
+  font-size: 0.72em;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Modal À propos (thème clair vitrine) ────────────────────────────── */
+
+.about-version { color: var(--wate-orange); font-size: 1rem; }
+.about-copy    { color: var(--text-muted); font-size: 0.75rem; margin-top: -0.4em; }
+.about-intro   { color: var(--text); }
+
+/* ── Bloc droite du header — burger + sélecteur de langue ──────────── */
+/* ── Barre de recherche site ────────────────────────────────────────────── */
+.site-search {
+  position: relative;
+  margin: 0 1em;
+  flex: 1;
+  max-width: 280px;
+}
+.site-search input {
+  width: 100%;
+  padding: 0.3em 0.6em;
+  border: 1px solid #d0d5db;
+  border-radius: 4px;
+  background: #f8f9fb;
+  color: var(--wate-navy);
+  font-size: 0.9em;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+.site-search input:focus {
+  border-color: var(--wate-orange);
+  box-shadow: 0 0 0 2px rgba(240, 165, 0, 0.2);
+}
+.site-search input::placeholder {
+  color: #8fa0b4;
+}
+.site-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.site-search-results:not(:empty) {
+  display: block;
+}
+.site-search-item {
+  display: block;
+  padding: 0.5em 0.7em;
+  color: var(--wate-navy);
+  font-size: 0.88em;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+}
+.site-search-item:hover {
+  background: #f0f4f8;
+}
+.site-search-item:last-child {
+  border-bottom: none;
+}
+.site-search-item mark {
+  color: var(--wate-orange);
+  font-weight: 700;
+  background: transparent;
+}
+.site-search-item .src {
+  display: block;
+  font-size: 0.78em;
+  color: #8fa0b4;
+  margin-top: 0.15em;
+}
+.site-search-empty {
+  display: block;
+  padding: 0.5em 0.7em;
+  color: #8fa0b4;
+  font-size: 0.88em;
+  font-style: italic;
+}
+
+/* Wrapper .site-header-right : pousse les deux <icon-menu> à droite via
+   margin-left: auto. Indispensable parce que le def.js du moteur écrase
+   le style inline des <icon-menu> avec un margin (margin-left:20px ou
+   margin-right:20px selon la position détectée), ce qui annule un
+   margin-left: auto appliqué directement sur eux. */
+.site-header-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ── Main + sections ───────────────────────────────────────────────── */
+.site-main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 1.5em 1em;
+  width: 100%;
+  flex: 1;  /* pousse le footer en bas quand la page est courte */
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────── */
+.hero {
+  padding: clamp(2em, 8vw, 5em) 0 clamp(2em, 6vw, 4em);
+  text-align: center;
+}
+.hero-title {
+  font-size: clamp(1.8rem, 6vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+  color: var(--wate-navy);
+  letter-spacing: -0.02em;
+}
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: var(--text-muted);
+  max-width: 42em;
+  margin: 0 auto 1.8em;
+}
+.hero-cta {
+  display: flex;
+  gap: 0.8em;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Boutons ───────────────────────────────────────────────────────── */
+.btn {
+  display: inline-block;
+  padding: 0.7em 1.4em;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.95em;
+  border: 2px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.btn:hover       { transform: translateY(-1px); box-shadow: var(--shadow-md) }
+.btn:active      { transform: translateY(0) }
+.btn-primary     { background: var(--wate-orange); color: #fff }
+.btn-primary:hover { background: var(--wate-orange-dk); color: #fff }
+.btn-ghost       {
+  background: transparent;
+  border-color: var(--wate-navy);
+  color: var(--wate-navy);
+}
+.btn-ghost:hover { background: var(--wate-navy); color: #fff }
+
+/* ── Features grid ─────────────────────────────────────────────────── */
+.features {
+  display: grid;
+  gap: 1.2em;
+  grid-template-columns: 1fr;
+  padding: 1em 0 3em;
+}
+
+.feature-link         { text-decoration: none; color: inherit; display: block }
+.feature-link:hover   { text-decoration: none }
+.feature-link:visited { color: inherit }
+
+/* ── Footer — sticky bas (même pattern que le header) ──────────────── */
+.site-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  border-top: 1px solid var(--border);
+  padding: 0.6em 1em;
+  color: var(--text-muted);
+  background: var(--bg-chrome);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  flex-wrap: wrap;
+  font-size: 0.85em;
+  box-shadow: 0 -1px 3px rgba(0, 33, 71, 0.04);
+}
+.site-footer-tagline { margin: 0; font-weight: 600; color: var(--wate-navy) }
+.site-footer-copy    { margin: 0 }
+.site-footer a       { color: var(--wate-navy); font-weight: 500 }
+
+/* ── Responsive (≥ 720px) ──────────────────────────────────────────── */
+@media (min-width: 720px) {
+  .site-header { padding: 1em 2em }
+  .site-main   { padding: 2em }
+
+  .features { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.6em }
+}
+
+/* ── Skin vitrine du <modal-popup> ─────────────────────────────────── */
+/* Surcharge du contrat de thème exposé par custom/modal-popup/def.css v1.4.2.
+   Les valeurs ci-dessous remplacent la charte admin (marine + boutons 3D)
+   par la charte vitrine (carte blanche, liseré orange haut, bouton navy plat).
+   Variables touchées : couleurs, radius, padding, ombre, bordure haute, boutons,
+   liens, logo (masqué). Le reste hérite des défauts du moteur. */
+modal-popup {
+  /* Fond + texte */
+  --mp-bg:            var(--bg-elev);
+  --mp-color:         var(--text);
+
+  /* Bordure : aucune sur les côtés/bas, liseré orange en haut uniquement */
+  --mp-border-width:  0;
+  --mp-border-style:  none;
+  --mp-border-top:    4px solid var(--wate-orange);
+
+  /* Forme */
+  --mp-radius:        14px;
+  --mp-padding:       1.6em 1.8em 1.4em;
+  --mp-shadow:        0 20px 60px rgba(0, 33, 71, 0.35);
+
+  /* Header */
+  --mp-title-color:   var(--wate-navy);
+  --mp-title-size:    1.4rem;
+  --mp-rule-color:    var(--border);
+  --mp-icon-display:  flex;        /* logo WaTE dans l'entête du modal */
+  --mp-icon-src:      url('/images/WaTE-Logo.png');  /* logo foncé pour fond clair */
+
+  /* Backdrop */
+  --mp-backdrop:      rgba(0, 33, 71, 0.55);
+
+  /* Boutons — style plat WaTE.btn */
+  --mp-btn-radius:    10px;
+  --mp-btn-padding:   0.55em 1.4em;
+  --mp-btn-shadow:    none;
+
+  --mp-btn-ok-bg:        var(--wate-orange);
+  --mp-btn-ok-bg-hover:  var(--wate-orange-dk);
+  --mp-btn-ok-color:     #ffffff;
+
+  --mp-btn-cancel-bg:       transparent;
+  --mp-btn-cancel-bg-hover: var(--bg);
+  --mp-btn-cancel-color:    var(--wate-navy);
+
+  /* Liens dans le body */
+  --mp-link-color:    var(--wate-navy);
+  --mp-link-hover:    var(--wate-orange);
+}
+
+/* ── Reset bouton logo WaTE (entête admin moteur) ──────────────────────── */
+/* Évite que le button admin-db.css ou autre ne stylise le logo cliquable.   */
+
+.wate-logo-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 4px 0 10px;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.wate-logo-btn:hover,
+.wate-logo-btn:active         { background: none; box-shadow: none; transform: none; }
+.wate-logo-btn img            { height: 48px; display: block; padding: 0; }
+.wate-logo-btn:hover img      { filter: drop-shadow(0 0 4px var(--wate-orange)); }
+.wate-logo-btn:focus-visible  { outline: 2px solid var(--wate-orange); outline-offset: 2px; border-radius: 4px; }
+
+/* (WaTE) web/css/common.css v1.5.2 */

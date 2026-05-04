@@ -1,0 +1,76 @@
+{
+  "name": "wate-engine",
+  "version": "3.19.5",
+  "description": "Web as Table Engine — CMS Engine Node.js/Express/SQLite DB driven",
+  "main": "engine.js",
+  "engines": {
+    "node": ">=4.6.1"
+  },
+  "//": {
+    "node4": "Node 4.6.1 requis pour la compatibilité engine. EJS ~3.0.x (3.1.x incompatible Node 4). CVE-2022-29078 non exploitable (Express res.render, pas renderFile direct)."
+  },
+  "scripts": {
+    "start": "node engine.js",
+    "test-app": "node test/app.js"
+  },
+  "files": [
+    "engine.js",
+    "_apikey.js",
+    "_audit.js",
+    "_auth.js",
+    "_core.js",
+    "_cron.js",
+    "_data.js",
+    "_db.js",
+    "_log.js",
+    "_mail.js",
+    "_migration.js",
+    "_modules.js",
+    "_search.js",
+    "_stats.js",
+    "_utils.js",
+    "scripts/sha256.js",
+    "doc/*.md",
+    "doc/*.fr.md",
+    "DockerFile",
+    "docker-compose.yml",
+    "migrate-password.js",
+    "migrations/",
+    "views/",
+    "scripts/",
+    "images/",
+    "css/",
+    "custom/"
+  ],
+  "keywords": [
+    "cms",
+    "express",
+    "sqlite",
+    "ejs",
+    "wate"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/athoth-npm/wate-engine.git"
+  },
+  "homepage": "https://www.wate.fr/",
+  "bugs": {
+    "url": "https://github.com/athoth-npm/wate-engine/issues"
+  },
+  "author": {
+    "name": "Romain Légault",
+    "url": "https://www.legault.fr/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.0.2",
+    "express": "^4.18.2",
+    "jimp": "^1.6.1",
+    "minimist": "^1.2.8",
+    "multer": "^1.4.2",
+    "nodemailer": "^2.3.2",
+    "serve-favicon": "^2.5.0",
+    "sqlite3": "^4.0.0"
+  }
+}

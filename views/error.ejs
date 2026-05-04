@@ -1,0 +1,57 @@
+<%
+/**
+ * \file      (WaTE) error.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      21/03/2026
+ * \version   2.0.2
+ * \brief     Page d'erreur autonome — rendue directement par httpError sans DB.
+ *
+ * \details   v1.1.0 : eval() supprimé — résolution explicite via map de variables.
+ *            v2.0.0 : refonte complète — error.ejs est maintenant dans engine/views/
+ *                     et rendu directement par httpError sans passer par pageData.
+ *                     errorCode, errorMsg, errorImage, errorTag, errorNext, rootRoute
+ *                     passés directement depuis httpError.
+ *                     error.js chargé via <script src="/scripts/error.js"> hardcodé.
+ *                     error.css chargé via <link href="/css/error.css"> — surchargeable
+ *                     par l'application (engine/css/ < application/css/).
+ *                     glossaryItem disponible — glossaire chargé si DB accessible,
+ *                     sinon errorTag affiché brut avec errorCode HTTP.
+ *            v2.0.1 : balises </body> </html> ajoutées en fin de fichier.
+ *            v2.0.2 : FIX sortie non echappee glossaryItem
+ *                     (injection HTML possible).
+ */
+//log.print(log.RUN, "ENTER error.ejs")
+
+// Calcul du préfixe relatif selon la profondeur de la requête courante (req.path)
+// Ex 1 : Erreur sur GET /data-table (profondeur 0) -> rel = '' -> css/error.css
+// Ex 2 : Erreur sur POST /insert/table (profondeur 1) -> rel = '../' -> ../css/error.css
+var depth = req.path.split('/').length - 2
+var rel = depth > 0 ? new Array(depth + 1).join('../') : ''
+
+%><!DOCTYPE html>
+<html lang="<%=lang%>">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Error <%=errorCode%></title>
+  <link rel="stylesheet" type="text/css" href="<%=rel%>css/error.css">
+  <script src="<%=rel%>scripts/error.js" defer<% if(typeof nonce !== 'undefined' && nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+</head>
+<body>
+<div data-error-next="<%=errorNext || ''%>"
+     data-root-route="<%=rootRoute || ''%>"
+     style="display:grid; height:100%; align-items:center">
+  <img style="margin:auto; max-height:40vh"
+       src="<%=rel%>images/<%=errorImage%>"
+       alt="<%=errorCode%>"
+       title="<%=glossaryItem(result, errorTag)%>">
+  <p style="margin:auto; font-size:28pt; color:red; background-color:white; padding: 10px">
+    <%=errorCode%> — <%=glossaryItem(result, errorTag)%><%=errorMsg ? ' : ' + errorMsg : ''%>
+  </p>
+</div>
+</body>
+</html><%
+
+// log.print(log.RUN, "LEAVE error.ejs")
+
+/* (WaTE) error.ejs v2.0.2 */%>

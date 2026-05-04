@@ -1,0 +1,202 @@
+/**
+ * \file      (WaTE) web/custom/wate-example/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   1.2.0
+ * \brief     Styles du <wate-example> — tout encapsulé dans le shadow DOM.
+ */
+
+:host { display: block }
+
+/* ── Bloc exemple ──────────────────────────────────────────────────── */
+.example {
+  background: var(--bg-elev, #ffffff);
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: var(--radius-lg, 16px);
+  padding: clamp(1.2em, 3vw, 2em);
+  margin: 0 0 2em;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,33,71,0.06), 0 1px 2px rgba(0,33,71,0.04));
+}
+
+/* ── En-tête ───────────────────────────────────────────────────────── */
+.example-head { margin-bottom: 1.5em }
+
+.example-num {
+  display: inline-block;
+  font-size: .75em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--wate-orange-dk, #c88800);
+  background: var(--orange-light);
+  padding: .3em .8em;
+  border-radius: 999px;
+  margin-bottom: .6em;
+}
+
+.example-title {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 700;
+  color: var(--wate-navy, #002147);
+  margin: 0 0 .4em;
+  letter-spacing: -.01em;
+}
+
+.example-lead {
+  color: var(--text-muted, #5a6a7e);
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* ── Schéma de chemin ──────────────────────────────────────────────── */
+.example-path { margin: 1.5em 0 }
+
+/* ── Split code / aperçu ───────────────────────────────────────────── */
+.example-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+  margin-bottom: 1.5em;
+}
+
+@media (min-width: 900px) {
+  .example-split { grid-template-columns: 1fr 1fr; gap: 1.4em }
+}
+
+.pane-label {
+  font-size: .72em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #5a6a7e);
+  margin-bottom: .5em;
+}
+
+/* ── Code (déplacé dans le shadow DOM par afterScript) ─────────────── */
+.example-code pre {
+  margin: 0 0 .7em;
+  padding: 1.2em;
+  background: var(--code-bg);
+  color: var(--code-color);
+  border-radius: var(--radius, 10px);
+  overflow-x: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: .85em;
+  line-height: 1.55;
+  -webkit-overflow-scrolling: touch;
+}
+.example-code pre:last-child { margin-bottom: 0 }
+.example-code code { font-family: inherit }
+
+.code-sublabel {
+  font-size: .7em;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--wate-orange-dk, #c88800);
+  margin: .6em 0 .3em;
+}
+.code-sublabel:first-child { margin-top: 0 }
+
+/* ── Aperçu (frame + contenu déplacé par afterScript) ──────────────── */
+.preview-frame {
+  background: var(--bg-elev, #ffffff);
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,33,71,0.06), 0 1px 2px rgba(0,33,71,0.04));
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  padding: .5em .8em;
+  background: var(--preview-bar-bg);
+  border-bottom: 1px solid var(--border, #dbe3ec);
+}
+
+.preview-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.preview-dot.r { background: #ff5f57 }
+.preview-dot.y { background: #ffbd2e }
+.preview-dot.g { background: #28c941 }
+
+.preview-url {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono, monospace);
+  font-size: .78em;
+  color: var(--text-muted, #5a6a7e);
+  background: var(--bg-elev, #ffffff);
+  padding: .2em .8em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border, #dbe3ec);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-body { padding: 1.2em }
+
+.preview-meta {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  font-size: .82em;
+  color: var(--text-muted, #5a6a7e);
+  padding-bottom: .8em;
+  border-bottom: 1px dashed var(--border, #dbe3ec);
+  margin-bottom: 1em;
+}
+.preview-meta code {
+  background: var(--bg, #f5f5f5);
+  padding: .1em .4em;
+  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+}
+.status-ok { color: #1a7f3f }
+.status-ok strong { color: inherit }
+
+/* ── Contenu de l'aperçu (déplacé dans le shadow DOM) ──────────────── */
+.preview-h1 {
+  font-size: 1.6rem;
+  color: var(--wate-navy, #002147);
+  margin: .2em 0 .3em;
+  font-weight: 700;
+}
+.preview-p {
+  color: var(--text, #333);
+  margin: 0;
+}
+.preview-list {
+  list-style: none;
+  margin: .5em 0 0;
+  padding: 0;
+}
+.preview-list li {
+  padding: .45em .7em;
+  border-bottom: 1px solid var(--border, #dbe3ec);
+  color: var(--text, #333);
+  font-size: .95em;
+}
+.preview-list li:last-child { border-bottom: none }
+
+/* ── Explication ───────────────────────────────────────────────────── */
+.example-explain {
+  padding: 1em 1.2em;
+  background: #f5f9fd;
+  border-left: 3px solid var(--wate-orange, #f0a500);
+  border-radius: 0 var(--radius, 6px) var(--radius, 6px) 0;
+}
+.example-explain p {
+  margin: 0;
+  color: var(--text, #333);
+  font-size: .98em;
+}
+
+/* (WaTE) web/custom/wate-example/def.css v1.2.0 */

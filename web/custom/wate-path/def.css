@@ -1,0 +1,166 @@
+/**
+ * \file      (WaTE) web/custom/wate-path/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.0.0
+ * \brief     Styles shadow DOM des custom elements <wate-path> et <wate-path-step>.
+ *
+ * \details   Pipeline horizontal compact d'une requête WaTE.
+ *            Étape active : fond orange clair, bord orange, texte navy.
+ *            Étape pass-through : fond blanc, bord pointillé gris, texte muted.
+ *            Flèche → entre étapes (CSS pseudo-element :after sur :host(wate-path-step)).
+ *            Sous 720px : retombe en colonne, flèches ↓.
+ */
+
+:host {
+  display: block;
+  --wp-navy:     #002147;
+  --wp-orange:   #f0a500;
+  --wp-orange-l: #fff4dc;
+  --wp-cream:    #fffaf0;
+  --wp-text:     #1a2332;
+  --wp-muted:    #5a6a7e;
+  --wp-bg:       #ffffff;
+  --wp-border:   #dbe3ec;
+  --wp-arrow:    #c98700;
+}
+
+/* ── <wate-path> ─────────────────────────────────────────────────────── */
+.path {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+.path-title {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp-muted);
+  padding: 0 0.2em;
+}
+.path-title:empty {
+  display: none;
+}
+
+.path-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+/* ── <wate-path-step> ────────────────────────────────────────────────── */
+:host(wate-path-step) {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  /* La flèche → est placée hors du flex (à droite) pour rester nette
+     même quand le step se contracte. */
+  margin-right: 1.2em;
+}
+:host(wate-path-step[data-last]) {
+  margin-right: 0;
+}
+
+/* Flèche → entre étapes (placée APRÈS la boîte, dans la marge réservée) */
+:host(wate-path-step)::after {
+  content: '→';
+  position: absolute;
+  right: -0.95em;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--wp-arrow);
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1;
+  pointer-events: none;
+}
+:host(wate-path-step[data-last])::after {
+  content: '';
+  display: none;
+}
+
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15em;
+  padding: 0.55em 0.6em;
+  background: var(--wp-bg);
+  border: 1.5px dashed var(--wp-border);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 3em;
+  box-sizing: border-box;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.step-label {
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--wp-muted);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-note {
+  font-size: 0.72em;
+  font-style: italic;
+  color: var(--wp-muted);
+  opacity: 0.85;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.step-note:empty {
+  display: none;
+}
+
+/* État actif */
+:host(wate-path-step[data-active]) .step {
+  background: var(--wp-orange-l);
+  border-style: solid;
+  border-color: var(--wp-orange);
+  box-shadow: 0 1px 3px rgba(240, 165, 0, 0.18);
+}
+:host(wate-path-step[data-active]) .step-label {
+  color: var(--wp-navy);
+}
+:host(wate-path-step[data-active]) .step-note {
+  color: var(--wp-orange);
+  opacity: 1;
+}
+
+/* ── Responsive : sous 720px, layout vertical ───────────────────────── */
+@media (max-width: 720px) {
+  .path-inner {
+    flex-direction: column;
+  }
+  :host(wate-path-step) {
+    margin-right: 0;
+    margin-bottom: 1.4em;
+    flex: 1 1 auto;
+  }
+  :host(wate-path-step[data-last]) {
+    margin-bottom: 0;
+  }
+  :host(wate-path-step)::after {
+    content: '↓';
+    right: 50%;
+    top: auto;
+    bottom: -1.1em;
+    transform: translateX(50%);
+  }
+}
+
+/* (WaTE) web/custom/wate-path/def.css v1.0.0 */

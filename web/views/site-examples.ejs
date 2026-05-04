@@ -1,0 +1,157 @@
+<%
+/**
+ * \file      (WaTE) web/views/site-examples.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-29
+ * \version   4.0.1
+ * \brief     Page /examples. Les blocs sont pré-construits dans des variables
+ *            EJS (blocs < % % >) puis injectés en attributs avec < % =var% >.
+ */
+var G = result
+var L = {
+  explain: _gi(G,'ex-explain-label'), preview: _gi(G,'ex-result-label'),
+  routeL:  _gi(G,'preview-route'),    status:  _gi(G,'preview-status'),
+  path:    _gi(G,'pipeline-title'),
+  pexpr:   _gi(G,'pipe-express'),     proute:  _gi(G,'pipe-route'),
+  ppage:   _gi(G,'pipe-page'),        pquery:  _gi(G,'pipe-queries'),
+  phook:   _gi(G,'pipe-hook'),        prender: _gi(G,'pipe-render')
+}
+
+// _s(g, fn, n, classes) — construit les blocs de code HTML.
+// g=result, fn=_gi, n=numéro exemple, classes=['sql','ejs',...]
+// Passage explicite pour éviter les closures instables avec le 'with' EJS.
+function _s(g, fn, n, classes) {
+  var h = '', k, txt
+  for(var i = 0; i < classes.length; i++) {
+    k = i + 1
+    h += '<div class=code-sublabel>'+fn(g,'ex'+n+'-sublabel-'+k)+'</div>'
+    txt = fn(g,'ex'+n+'-code-'+k)
+    // Échappe < > & pour affichage dans <pre><code> — la 1re couche
+    // d'échappement (attribut HTML) est annulée par le navigateur.
+    txt = txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    h += '<pre><code class="'+classes[i]+'">'+txt+'</code></pre>'
+  }
+  return h
+}
+
+// Blocs de code et previews pré-construits
+var cb1 = _s(G, _gi, 1, ['sql','ejs'])
+var pv1 = '<h3 class=preview-h1>Bonjour</h3><p class=preview-p>'+_gi(G,'preview-hello')+'</p>'
+
+var cb2 = _s(G, _gi, 2, ['sql','ejs'])
+var pv2 = '<h3 class=preview-h1>'+_gi(G,'ex2-preview-h')+'</h3><p class=preview-p>'+_gi(G,'ex2-preview-p')+'</p>'
+
+var cb3 = _s(G, _gi, 3, ['sql','ejs'])
+var pv3 = '<ul class=preview-list><li><strong>Bol émaillé</strong> — 14,50 €</li><li><strong>Carafe en grès</strong> — 24,00 €</li><li><strong>Plateau en chêne</strong> — 38,00 €</li></ul>'
+
+var cb4 = _s(G, _gi, 4, ['js','sql','ejs'])
+var pv4 = '<h3 class=preview-h1>'+_gi(G,'ex4-preview-h')+'</h3><p class=preview-p>'+_gi(G,'ex4-preview-p')+'</p>'
+
+var cb5 = _s(G, _gi, 5, ['js','sql','ejs'])
+var pv5 = '<h3 class=preview-h1>'+_gi(G,'ex5-preview-h')+'</h3><p class=preview-p>'+_gi(G,'ex5-preview-p')+'</p>'
+
+var cb6 = _s(G, _gi, 6, ['sql','bash'])
+var pv6 = '<h3 class=preview-h1>'+_gi(G,'ex6-preview-h')+'</h3><p class=preview-p>'+_gi(G,'ex6-preview-p')+'</p>'
+
+var cb7 = _s(G, _gi, 7, ['sql','bash'])
+var pv7 = '<h3 class=preview-h1>'+_gi(G,'ex7-preview-h')+'</h3><p class=preview-p>'+_gi(G,'ex7-preview-p')+'</p>'
+%>
+<script type="module" src="/custom/wate-example/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+<script type="module" src="/custom/wate-path/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+
+<section class="examples-hero">
+  <h1 class="examples-heading"><%=_gi(G,'examples-heading')%></h1>
+  <p class="examples-intro"><%=_gi(G,'examples-intro')%></p>
+  <figure class="examples-legend">
+    <wate-path title="<%=_gi(G,'pipeline-legend-title')%>">
+      <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+      <wate-path-step label="<%=L.proute%>" active></wate-path-step>
+      <wate-path-step label="<%=L.ppage%>" active></wate-path-step>
+      <wate-path-step label="<%=L.pquery%>" active></wate-path-step>
+      <wate-path-step label="<%=L.phook%>" active></wate-path-step>
+      <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+    </wate-path>
+    <p class="examples-legend-text"><%=_gi(G,'pipeline-legend')%></p>
+  </figure>
+</section>
+
+<wate-example id="ex1" num="<%=_gi(G,'ex1-num')%>" title="<%=_gi(G,'ex1-title')%>" lead="<%=_gi(G,'ex1-lead')%>" explain="<%=_gi(G,'ex1-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/hello" code-blocks="<%=cb1%>" preview="<%=pv1%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=300"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<wate-example id="ex2" num="<%=_gi(G,'ex2-num')%>" title="<%=_gi(G,'ex2-title')%>" lead="<%=_gi(G,'ex2-lead')%>" explain="<%=_gi(G,'ex2-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/a-propos?lang=fr" code-blocks="<%=cb2%>" preview="<%=pv2%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=301"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active note="lang=fr|en"></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<wate-example id="ex3" num="<%=_gi(G,'ex3-num')%>" title="<%=_gi(G,'ex3-title')%>" lead="<%=_gi(G,'ex3-lead')%>" explain="<%=_gi(G,'ex3-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/catalogue" code-blocks="<%=cb3%>" preview="<%=pv3%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=302"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>" active note="products"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<wate-example id="ex4" num="<%=_gi(G,'ex4-num')%>" title="<%=_gi(G,'ex4-title')%>" lead="<%=_gi(G,'ex4-lead')%>" explain="<%=_gi(G,'ex4-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/dashboard" code-blocks="<%=cb4%>" preview="<%=pv4%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=303"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>" active note="weather"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<wate-example id="ex5" num="<%=_gi(G,'ex5-num')%>" title="<%=_gi(G,'ex5-title')%>" lead="<%=_gi(G,'ex5-lead')%>" explain="<%=_gi(G,'ex5-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/dashboard" code-blocks="<%=cb5%>" preview="<%=pv5%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>" active note="GET /dashboard"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="renderPage()"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+
+<wate-example id="ex6" num="<%=_gi(G,'ex6-num')%>" title="<%=_gi(G,'ex6-title')%>" lead="<%=_gi(G,'ex6-lead')%>" explain="<%=_gi(G,'ex6-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/admin/api/db/article?sort=prix&dir=desc&filter=auteur:Hugo&search=Paris" code-blocks="<%=cb6%>" preview="<%=pv6%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=301"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<wate-example id="ex7" num="<%=_gi(G,'ex7-num')%>" title="<%=_gi(G,'ex7-title')%>" lead="<%=_gi(G,'ex7-lead')%>" explain="<%=_gi(G,'ex7-explain')%>" explain-label="<%=L.explain%>" preview-label="<%=L.preview%>" preview-route-label="<%=L.routeL%>" preview-status-label="<%=L.status%>" route="/admin/api/db/_audit" code-blocks="<%=cb7%>" preview="<%=pv7%>">
+  <wate-path slot="path" title="<%=L.path%>">
+    <wate-path-step label="<%=L.pexpr%>" active></wate-path-step>
+    <wate-path-step label="<%=L.proute%>"></wate-path-step>
+    <wate-path-step label="<%=L.ppage%>" active note="list_id=302"></wate-path-step>
+    <wate-path-step label="<%=L.pquery%>"></wate-path-step>
+    <wate-path-step label="<%=L.phook%>"></wate-path-step>
+    <wate-path-step label="<%=L.prender%>" active></wate-path-step>
+  </wate-path>
+</wate-example>
+
+<%# (WaTE) web/views/site-examples.ejs v4.0.2 %>

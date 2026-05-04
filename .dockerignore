@@ -1,0 +1,32 @@
+# Dépendances (réinstallées via npm install)
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Tests
+test/
+
+# Bases de données (montées en volume)
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads (montés en volume)
+store/
+
+# Documentation
+*.md
+doc/
+
+# Claude Code
+.claude/
+
+# Configuration sensible
+.env
+
+# Fichiers Docker (inutiles dans l'image)
+DockerFile
+docker-compose.yml
+.dockerignore

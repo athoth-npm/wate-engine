@@ -1,0 +1,39 @@
+# Dépendances (non utilisé ici — packages installés globalement)
+node_modules/
+
+# Base de données de test (générée par setup-db.js)
+test/test.db
+test/test.db-wal
+test/test.db-shm
+test/test-out.txt
+test/result-content.txt
+
+# Dossier d'uploads de test
+test/store/
+
+# Bases de données applicatives (ne jamais versionner les données)
+*.db
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+
+# Fichiers de verrouillage LibreOffice/Office
+.~lock.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Analyse interne (document de travail)
+ANALYSIS.md
+
+# Outils de développement locaux
+.claude/
+.claudeignore
+CLAUDE.md
+doc/*
+!doc/*.md
+!doc/*.fr.md

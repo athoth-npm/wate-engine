@@ -1,0 +1,15 @@
+<h2>Recherche</h2>
+<form class="search-page-form" autocomplete="off" onsubmit="return!1">
+  <input type="search" id="search-page-input" class="search-page-input" placeholder="Rechercher une page, un texte..." autofocus>
+</form>
+<div class="search-page-results" id="search-page-results"></div>
+<script<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+(function(){var i=document.getElementById('search-page-input'),r=document.getElementById('search-page-results'),t,_ctrl=null,l='<%=lang%>';if(!i||!r)return;// FIX v1.0.2: regex statiques
+var _a=/&/g,_b=/</g,_c=/>/g,_d=/"/g,_e=/'/g,_su=/^\/(?!\/)|^https?:\/\//
+function esc(s){return String(s||'').replace(_a,'&amp;').replace(_b,'&lt;').replace(_c,'&gt;').replace(_d,'&quot;').replace(_e,'&#39;')}
+function safeUrl(u){var s=String(u||'');return _su.test(s)?s:'#'}
+i.addEventListener('input',function(){clearTimeout(t);var q=i.value.trim();if(!q){r.innerHTML='';return}
+t=setTimeout(function(){if(_ctrl)_ctrl.abort();_ctrl=new AbortController();fetch('/admin/api/search?q='+encodeURIComponent(q)+'&lang='+l,{credentials:'same-origin',signal:_ctrl.signal}).then(function(x){return x.json()}).then(function(d){if(!d.results||!d.results.length){r.innerHTML='<p style=color:#8ab>(aucun résultat)</p>';return}
+r.innerHTML=d.results.map(function(x){var u=x.urls&&x.urls[0]?' href="'+esc(safeUrl(x.urls[0]))+'"':'';return'<a'+u+' class=search-result><span>'+esc(x.snippet)+'</span><span class=src>'+esc(x.source)+' - '+esc(x.tag)+'</span></a>'}).join('')}).catch(function(){r.innerHTML=''})},300)})})()
+</script>
+<%# search.ejs v1.0.1 %>

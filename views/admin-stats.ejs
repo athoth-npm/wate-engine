@@ -1,0 +1,49 @@
+<%
+/**
+ * \file      (WaTE) admin-stats.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   2.0.0
+ * \brief     Fragment EJS — page d'administration des statistiques LRU.
+ *
+ * \details   Chargé via elements.template='admin-stats' (common.ejs).
+ *            Rend toute la structure HTML statique côté serveur (_gi() pour i18n).
+ *            Le script admin-stats.js (type=module) fait un fetch GET /admin/api/stats
+ *            et peuple uniquement <tbody id="stats-body"> — show/hide via hidden.
+ *            Aucune chaîne UI dans admin-stats.js — rôle limité à l'échange client/serveur.
+ *
+ *            Accessible uniquement au profil owner (profil_id=0),
+ *            contrôlé par _page (migration 003_stats.sql).
+ *
+ *            Surchargeable : placer views/admin-stats.ejs dans app/views/.
+ *            admin-stats.css surchargeable : placer css/admin-stats.css dans app/css/.
+ *
+ *            v2.0.0 : structure entière rendue par EJS (thead, note, bouton, états).
+ *                     admin-stats.js ne construit plus de HTML — peuple tbody uniquement.
+ */
+%>
+  <h2><%=_gi(result, 'nav-stats')%></h2>
+
+  <div id="stats-wrap">
+    <p id="stats-loading" class="stats-loading"><%=_gi(result, 'stats-loading')%></p>
+    <p id="stats-empty"   class="stats-empty"   hidden><%=_gi(result, 'stats-empty')%></p>
+    <p id="stats-error"   class="stats-error"   hidden><%=_gi(result, 'stats-error')%><span id="stats-error-msg"></span></p>
+
+    <table class="stats-table" id="stats-table" hidden>
+      <thead><tr>
+        <th><%=_gi(result, 'stats-col-cache')%></th>
+        <th><%=_gi(result, 'stats-col-hits')%></th>
+        <th><%=_gi(result, 'stats-col-misses')%></th>
+        <th><%=_gi(result, 'stats-col-ratio')%></th>
+        <th><%=_gi(result, 'stats-col-evict')%></th>
+        <th><%=_gi(result, 'stats-col-size')%></th>
+      </tr></thead>
+      <tbody id="stats-body"></tbody>
+    </table>
+
+    <p id="stats-note" class="stats-note" hidden><%=_gi(result, 'stats-note')%></p>
+    <button id="btn-refresh" hidden>&#x21BB; <%=_gi(result, 'stats-refresh')%></button>
+  </div>
+
+<%# admin-stats.ejs v2.0.0 %>

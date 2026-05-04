@@ -1,0 +1,180 @@
+<%
+/**
+ * \file      (WaTE) common.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   1.7.4
+ * \brief     Template maître WaTE — charte graphique + inclusion du fragment elements.template.
+ *
+ * \details   Chargé par serve() (_data.js) quand elements.JS est absent,
+ *            et par les jsHandlers des modules via res.render('common', ...).
+ *
+ *            Variables attendues (toujours présentes) :
+ *              req, path, EJSs, lang, elements, result, profil_id
+ *            Variables optionnelles (passées par jsHandlers des modules) :
+ *              nonce, mode, user, langOptions, next, table, columns, fkOptions
+ *
+ *            elements.template  : nom du fragment EJS à inclure (ex : 'admin-auth').
+ *            elements.title     : titre affiché dans <title>.
+ *            elements.css       : feuille de style de la page (ex : 'admin-auth.css').
+ *            elements.scripts   : scripts JSON à injecter dans <head>, ex :
+ *                                 {"type":"module","path":"/scripts/admin-auth.js"}
+ *                                 Plusieurs scripts : valeurs concaténées par virgule
+ *                                 (accumulation automatique des _item de même clé).
+ *            elements.nav-menu  : items du menu hamburger (JSON {rank,text,href,icon}).
+ *                                 Contenu différent selon le profil :
+ *                                   owner (list 104)    — me, db, stats, signout.
+ *                                   anonymous (list 105) — signin, signup.
+ *            elements.lang-menu : items du menu langue (JSON {rank,text,icon,params}).
+ *                                 Identique pour tous les profils (list 103).
+ *
+ *            buildMenu() — lit elements[menuName+'-menu'], trie par rank,
+ *                          traduit le texte via glossaryItem, construit la
+ *                          chaîne "icon,label,href|..." pour l'attribut items de <icon-menu>.
+ *                          _gi = glossaryItem capturé au niveau top-level EJS (closure).
+ *
+ *            v1.0.1 : on indique le CSRF token dans une rubrique meta
+ *            v1.1.0 : boucle scripts — injecte les <script> depuis elements.scripts.
+ *            v1.2.0 : .header-user — email + profil du user connecté dans l'entête.
+ *            v1.3.0 : menus <icon-menu> dans l'entête.
+ *            v1.4.0 : logo WaTE = <img> statique ; hamburger = déclencheur menu nav.
+ *            v1.5.0 : buildMenu() — items depuis la DB (list 104/105 selon profil).
+ *                     Items @action supportés (signout via @wate.signout()).
+ *                     _gi capturé depuis with(locals) pour accès en closure.
+ *            v1.6.0 : <h1> et label "Profil" passent par glossaryItem (header-title,
+ *                     header-profil) — list 103 query étendue à tag LIKE 'header-%'.
+ *            v1.7.0 : Logo WaTE cliquable → modal « À propos » via window.wateModal.
+ *                     Import global de custom/modal-popup/def.js (remplace alert/confirm).
+ *                     Footer mailto romain.legault@wate.io → rlegault@wate.fr.
+ *            v1.7.1 : modal-popup v1.3.0 expose le thème via --mp-* — l'admin
+ *                     n'en surcharge AUCUNE : les valeurs par défaut du moteur
+ *                     reproduisent exactement la charte admin (marine/orange/3D).
+ *                     La vitrine surcharge dans web/css/common.css.
+ *            v1.7.2 : FIX buildMenu() — for...in sans hasOwnProperty →
+ *                     Object.keys().forEach(). Ajout encodeURIComponent()
+ *                     sur les valeurs de query params (anti-injection menu).
+ *            v1.7.3 : FIX XSS </script> — JSON.stringify().replace(/\//g, '\\/')
+ *                     sur title dans le bloc script wate-about (même vecteur
+ *                     que admin-db.ejs v7.0.1).
+ */
+var _gi = glossaryItem
+
+function buildMenu(req, elements, result, lang, menuName, menuIcon) {
+  var menuKey  = menuName + '-menu'
+  var queryStr = ''
+  // FIX v1.7.2 : Object.keys() + encodeURIComponent() — for...in sans
+  // hasOwnProperty + valeurs non encodées → risque injection menu via | ou ,
+  Object.keys(req.query).forEach(function(p) {
+    queryStr += (queryStr ? '&' : '?') + encodeURIComponent(p) + '=' + encodeURIComponent(req.query[p])
+  })
+  if(!elements[menuKey]) return { icon: '/images/' + menuIcon, href: req.path + queryStr, items: '' }
+  var menuStr = ''
+  var _items  = JSON.parse('[' + elements[menuKey] + ']').sort(function(a, b) { return a.rank - b.rank })
+  for(var item of _items) {
+    var href      = item.href || req.path
+    var paramsStr = ''
+    if(href.charAt(0) !== '@') {
+      // Menu nav : seul lang est hérité (évite de polluer avec table, sort...)
+      // Menu langue : conserve les params courants + change la langue
+      var paramsObj = menuName === 'lang' ? Object.assign({}, req.query) : {}
+      paramsObj.lang = lang
+      if(item.params) Object.keys(item.params).forEach(function(p) { paramsObj[p] = item.params[p] })
+      Object.keys(paramsObj).forEach(function(p) {
+        paramsStr += (paramsStr ? '&' : '?') + p + '=' + encodeURIComponent(paramsObj[p])
+      })
+    }
+    if(menuStr) menuStr += '|'
+    menuStr += '/images/' + item.icon + ',' + _gi(result, item.text) + ',' + href + paramsStr
+  }
+  return { icon: '/images/' + menuIcon, href: req.path + queryStr, items: menuStr }
+}
+
+var scripts = elements.scripts ? JSON.parse("[" + elements.scripts + "]") : []
+var _nav  = buildMenu(req, elements, result, lang, 'nav',  'hamburger.svg')
+var _lang = buildMenu(req, elements, result, lang, 'lang', lang + '.png')
+%>
+<!DOCTYPE html>
+<html lang="<%=lang%>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Jeton CSRF pour les requêtes asynchrones et formulaires -->
+  <meta name="csrf-token" content="<%= CSRFToken %>">
+  <!-- Script WaTE d'auto-injection CSRF -->
+  <!-- Note : l'attribut defer garantit que le script ne bloque pas le parseur HTML -->
+  <script src="/scripts/csrf.js" defer></script>
+  <title>WaTE<% if(elements.title) { %> — <%=elements.title%><% } %></title>
+  <link rel="stylesheet" href="/css/common.css">
+  <% if(elements.css) { %>
+  <link rel="stylesheet" href="/css/<%=elements.css%>">
+  <% } %>
+  <script type="module" src="/custom/custom.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <script type="module" src="/custom/icon-menu/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <script type="module" src="/custom/modal-popup/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+  <% for(var s of scripts) { %>
+  <script type="<%=s.type%>" src="<%=s.path%>"<% if(nonce) { %> nonce="<%=nonce%>"<% } %><% if(s.options) { %> <%=s.options%><% } %>></script>
+  <% } %>
+</head>
+<body>
+  <header>
+    <button type="button" id="wate-about" class="wate-logo-btn" aria-label="<%=_gi(result, 'wate-about-title')%>" title="<%=_gi(result, 'wate-about-title')%>">
+      <img src="/images/WaTE-Logo-White.png" alt="WaTE">
+    </button>
+    <h1><%=_gi(result, 'header-title')%></h1>
+    <% if(result['_user'] && result['_user'].rows && result['_user'].rows[0]) { %>
+    <form class="header-search" autocomplete="off" onsubmit="return!1">
+      <input type="search" id="global-search" role="search" aria-label="<%=_gi(result, 'header-search-placeholder')%>" placeholder="<%=_gi(result, 'header-search-placeholder')%>">
+      <div class="header-search-results" id="search-results" aria-live="polite"></div>
+    </form>
+    <% } %>
+    <div class="header-right">
+      <icon-menu icon="<%=_nav.icon%>" items="<%=_nav.items%>"></icon-menu>
+      <icon-menu href="<%=_lang.href%>" icon="<%=_lang.icon%>" items="<%=_lang.items%>"></icon-menu>
+<% var _hu = result && result['_user'] && result['_user'].rows && result['_user'].rows[0] %>
+<% if(_hu) { %>
+      <div class="header-user">
+        <span class="header-email"><%=_hu.email%></span>
+        <span class="header-profil"><%=_gi(result, 'header-profil')%> <%=_hu.profil_id%></span>
+      </div>
+<% } %>
+    </div>
+  </header>
+  <template id="wate-about-tpl">
+    <p class="about-version"><strong>WaTE <%=_gi(result, 'wate-version')%></strong></p>
+    <p class="about-copy"><%=_gi(result, 'wate-copyright')%></p>
+    <p class="about-intro"><%=_gi(result, 'wate-intro')%></p>
+    <ul class="about-features">
+      <li><%=_gi(result, 'wate-feat-auth')%></li>
+      <li><%=_gi(result, 'wate-feat-db')%></li>
+      <li><%=_gi(result, 'wate-feat-mail')%></li>
+      <li><%=_gi(result, 'wate-feat-audit')%></li>
+      <li><%=_gi(result, 'wate-feat-search')%></li>
+      <li><%=_gi(result, 'wate-feat-apikey')%></li>
+      <li><%=_gi(result, 'wate-feat-cron')%></li>
+      <li><%=_gi(result, 'wate-feat-stats')%></li>
+      <li><%=_gi(result, 'wate-feat-i18n')%></li>
+    </ul>
+    <p class="about-link"><a href="https://www.wate.fr" target="_blank" rel="noopener">www.wate.fr</a></p>
+  </template>
+  <script type="module"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+    var _aboutBtn = document.getElementById('wate-about')
+    if(_aboutBtn) _aboutBtn.addEventListener('click', function() {
+      var tpl = document.getElementById('wate-about-tpl')
+      window.wateModal.about({
+        title: <%- JSON.stringify(_gi(result, 'wate-about-title')).replace(/\//g, '\\/') %>,
+        html:  tpl.innerHTML
+      })
+    })
+  </script>
+  <main>
+<% if(elements.template) { %>
+    <%- include('./' + elements.template + '.ejs', {_gi}) %>
+<% } %>
+  </main>
+  <footer>
+    <p>&copy; 2023-2026 <a href="mailto:rlegault@wate.fr">Romain Légault</a></p>
+  </footer>
+</body>
+</html>
+<%# common.ejs v1.7.4 %>

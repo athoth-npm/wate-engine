@@ -1,0 +1,253 @@
+/**
+ * \file      (WaTE) web/custom/wate-mcd/def.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-25
+ * \version   2.2.3
+ * \brief     Styles shadow DOM des custom elements <wate-mcd>, <wate-table> et <wate-link>.
+ *
+ * \details   Une seule feuille pour les trois éléments — les sélecteurs distinguent.
+ *            Variables CSS regroupées sur :host (charte vitrine — fond clair, accent
+ *            orange) pour permettre la surcharge éventuelle par l'application.
+ *
+ *            v2.0.0 — vrai MCD : calque SVG superposé à la grille, traits ancrés
+ *            sur les bords des boîtes, pastilles de cardinalité aux extrémités.
+ *            La légende textuelle disparaît (le diagramme se suffit).
+ *            v2.1.0 — placement déclaratif row/col sur <wate-table>, grille à
+ *            largeur FIXE (220px par boîte), padding latent autour du stage
+ *            pour le routage extérieur, routage Manhattan avec évitement.
+ *            v2.2.2 — anti-débordement strict : :host(wate-mcd) overflow:hidden
+ *            + .mcd max-width:100% + stage en width:max-content, max-width:100%
+ *            + grille 2 colonnes fixes minmax(160px, 220px) qui se contracte
+ *            proprement quand la colonne hôte est étroite. Aucun débordement.
+ *
+ *            Mise en page :
+ *              <wate-mcd>   → titre + stage relatif (grille + svg overlay).
+ *              <wate-table> → carte blanche, titre marine + accent orange.
+ *              <wate-link>  → invisible (descripteur pur).
+ *
+ *            Grille fixe 2 colonnes minmax(160px, 220px). Sous 720px, une
+ *            colonne unique. Le SVG suit via ResizeObserver.
+ */
+
+:host {
+  display: block;
+  --wm-navy:     #002147;
+  --wm-navy-d:   #001633;
+  --wm-orange:   #f0a500;
+  --wm-orange-d: #c98700;
+  --wm-orange-l: #fff4dc;
+  --wm-cream:    #fffaf0;
+  --wm-text:     #1a2332;
+  --wm-muted:    #5a6a7e;
+  --wm-fk:       #1668b0;
+  --wm-bg:       #ffffff;
+  --wm-border:   #dbe3ec;
+  --wm-shadow:   0 2px 6px rgba(0, 33, 71, 0.06), 0 8px 18px rgba(0, 33, 71, 0.08);
+  --wm-line:     #5a6a7e;
+}
+
+/* :host doit être borné à la largeur du conteneur hôte — évite tout
+   débordement vers la zone du sommaire latéral ou hors document. */
+:host(wate-mcd) {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* ── <wate-mcd> ──────────────────────────────────────────────────────── */
+.mcd {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  gap: 0.7em;
+}
+
+.mcd-title {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wm-muted);
+  padding: 0 0.2em;
+}
+.mcd-title:empty {
+  display: none;
+}
+
+/* Stage = conteneur relatif qui empile la grille et le SVG overlay.
+   FIX v2.2.3: width:100% donne une largeur définie au grid (1fr fonctionnel).
+   max-width évite l'étirement excessif sur écrans larges. */
+.mcd-stage {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  padding: 22px 18px;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.mcd-grid {
+  position: relative;
+  z-index: 1;
+}
+/* FIX v2.2.3: slot = grid container — les slotted elements deviennent grid items */
+.mcd-grid slot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3em 6em;
+  align-items: stretch;
+}
+.mcd-grid slot > * {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .mcd-stage {
+    padding: 16px 0;
+    width: 100%;
+  }
+  .mcd-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5em 0;
+  }
+}
+
+/* Calque SVG : couvre tout le stage, pointer-events:none pour ne pas intercepter
+   le clic / hover. z-index 2 = au-dessus des boîtes (les pastilles doivent
+   apparaître par-dessus les bords). */
+.mcd-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.mcd-line {
+  fill: none;
+  stroke: var(--wm-line);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Pastilles de cardinalité */
+.mcd-card-bg {
+  fill: var(--wm-orange);
+  stroke: var(--wm-orange-d);
+  stroke-width: 1;
+}
+
+.mcd-card-text {
+  fill: var(--wm-navy-d);
+  font: 700 10px var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* Étiquette du milieu (verbe) */
+.mcd-label {
+  fill: var(--wm-muted);
+  font: italic 11px var(--font);
+}
+
+/* ── <wate-table> ────────────────────────────────────────────────────── */
+:host(wate-table) {
+  display: block;
+  height: 100%;
+}
+
+.tbl {
+  display: flex;
+  flex-direction: column;
+  background: var(--wm-bg);
+  border: 1px solid var(--wm-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--wm-shadow);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.tbl-title {
+  background: var(--wm-navy);
+  color: var(--wm-orange);
+  font-weight: 700;
+  text-align: center;
+  padding: 0.55em 0.8em;
+  border-bottom: 2px solid var(--wm-orange);
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+.tbl-cols {
+  list-style: none;
+  margin: 0;
+  padding: 0.45em 0;
+  flex: 1;
+}
+
+.tbl-cols li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+  padding: 0.25em 0.85em;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--wm-text);
+  /* FIX v2.2.3: nowrap forcait la colonne gauche à s'élargir */
+}
+
+.tbl-icon {
+  flex-shrink: 0;
+  width: 1.2em;
+  text-align: center;
+  font-size: 0.85em;
+}
+
+.tbl-name {
+  flex-shrink: 0;
+}
+
+.tbl-pk {
+  font-weight: 700;
+  color: var(--wm-navy);
+}
+.tbl-pk .tbl-name {
+  text-decoration: underline;
+  text-decoration-color: var(--wm-orange);
+  text-underline-offset: 3px;
+}
+
+.tbl-fk {
+  color: var(--wm-fk);
+}
+
+.tbl-fk-ref {
+  color: var(--wm-muted);
+  font-style: italic;
+  font-size: 0.92em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tbl-sep {
+  border-top: 1px solid var(--wm-border);
+  margin: 0.25em 0.7em;
+  padding: 0;
+  line-height: 0;
+  height: 0;
+  display: block;
+}
+
+/* ── <wate-link> ────────────────────────────────────────────────────── */
+:host(wate-link) {
+  display: none;
+}
+
+/* (WaTE) web/custom/wate-mcd/def.css v2.2.3 */

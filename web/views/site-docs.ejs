@@ -1,0 +1,545 @@
+<%
+/**
+ * \file      (WaTE) web/views/site-docs.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      2026-04-26
+ * \version   1.14.0
+ * \brief     Fragment page /docs — layout 3 colonnes (TOC / contenu / on-this-page).
+ *
+ * \details   Documentation complète — 13 sections rédigées :
+ *            1 Vue d'ensemble, 2 Architecture, 3 Le moteur, 4 Les modules,
+ *            5 Structure de la DB, 6 Écrire une application, 7 API développeur,
+ *            8 Sécurité, 9 i18n et glossaire, 10 Custom elements,
+ *            11 Déploiement, 12 API CRUD avancée, 13 Audit et recherche.
+ *
+ *            La TOC et le sommaire latéral utilisent position:sticky — mobile :
+ *            la TOC se replie dans un <details> en tête pour garder la hauteur.
+ *
+ *            v1.1.0 — section 2 « Architecture » : diagrammes <wate-stack> et
+ *                     <wate-flow> chargés en tête de fragment ; le placeholder
+ *                     dashed de la section 1 est remplacé par un vrai <wate-stack>.
+ *            v1.2.0 — sections 3-5 (Le moteur, Les modules, Structure de la DB).
+ *                     Ajout de l'import <wate-tree>.
+ *            v1.3.0 — section 5 enrichie d'un MCD via le nouveau couple
+ *                     <wate-mcd>/<wate-table>/<wate-link> (custom/wate-mcd/).
+ *            v1.4.0 — MCD migré vers wate-mcd v2 : traits SVG ancrés, pastilles
+ *                     de cardinalité Merise (cardFrom/cardTo), plus from/to ne
+ *                     pointent plus que sur le nom de table (pas table.colonne).
+ *            v1.5.0 — placement déclaratif row/col sur les tables du MCD :
+ *                     _profil ─ _page ─ _list (l. 1), _access ─ _glossary ─ _item
+ *                     (l. 2). Les liens directs (page→profil, page→list, etc.)
+ *                     sont alignés sans coude grâce à ce placement.
+ *            v1.6.0 — MCD recompacté en 2 colonnes × 3 lignes pour tenir dans la
+ *                     colonne centrale : (_profil _page) / (_access _list) /
+ *                     (_glossary _item). Plus aucun débordement.
+ *            v1.7.0 — MCD passé en 4 lignes : _access seul ligne 1, zone libre
+ *                     col 2 ligne 1 pour faire passer le lien _list↔_glossary.
+ *            v1.8.0 — lien _list→_glossary tracé via sideFrom="left" + sideTo="top"
+ *                     (au lieu de l'ancien `route`) : sort à gauche de _list,
+ *                     descend, atteint le haut de _glossary.
+ *            v1.9.0 — sections 6 (Écrire une application) et 7 (API des modules).
+ *                     +1 wate-tree pour la structure projet, +1 wate-flow pour
+ *                     les 3 étapes SQL de création d'une page.
+ *            v1.10.0 — sections 8 (Sécurité), 9 (i18n), 10 (Custom elements).
+ *                      +1 wate-flow pour le pipeline d'une requête mutating,
+ *                      +2 wate-stack pour les catalogues moteur et site vitrine.
+ *                      Plus aucune entrée « bientôt » dans la TOC.
+ *            v1.11.0 — colonne « on this page » retirée (redondante avec la TOC).
+ *                      Layout 2 colonnes : TOC à gauche, contenu à droite.
+ *            v1.12.0 — h1 de chaque section reprennent docs-toc-0X (avec numero
+ *                      « 1. Vue d'ensemble »). Scrollspy IntersectionObserver
+ *                      pour marquer la section visible dans la TOC.
+ *            v1.13.0 — deploiement + audit/search (sections 11-13).
+ *            v1.13.1 — section 6.5 Requetes dynamiques SQL (h-dynquery,
+ *                      p-dynquery) — format JSON, ${...}, types, regles.
+ *            v1.14.0 — section 7 enrichie : 7.5 _WATE_API, 7.6 Créer un
+ *                      module applicatif, 7.7 Fonctions cœur serve()/modify().
+ */
+%>
+<script type="module" src="/custom/wate-stack/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+<script type="module" src="/custom/wate-flow/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+<script type="module" src="/custom/wate-tree/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+<script type="module" src="/custom/wate-mcd/def.js"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>></script>
+<div class="docs-layout">
+
+  <!-- Colonne gauche — Table des matières -->
+  <aside class="docs-toc">
+    <details class="docs-toc-collapsible" open>
+      <summary class="docs-toc-label"><%=_gi(result, 'docs-toc-label')%></summary>
+<%
+var tocEntries = [
+  { id: 'overview',        key: 'docs-toc-01' },
+  { id: 'architecture',    key: 'docs-toc-02' },
+  { id: 'engine',          key: 'docs-toc-03' },
+  { id: 'modules',         key: 'docs-toc-04' },
+  { id: 'database',        key: 'docs-toc-05' },
+  { id: 'crud-api',        key: 'docs-toc-12' },
+  { id: 'writing-app',     key: 'docs-toc-06' },
+  { id: 'api',             key: 'docs-toc-07' },
+  { id: 'audit-search',    key: 'docs-toc-13' },
+  { id: 'security',        key: 'docs-toc-08' },
+  { id: 'i18n',            key: 'docs-toc-09' },
+  { id: 'custom-elements', key: 'docs-toc-10' },
+  { id: 'deployment',      key: 'docs-toc-11' }
+]
+%>
+      <nav>
+        <% tocEntries.forEach(function(e) { %>
+          <a class="docs-toc-link" href="#<%=e.id%>"><%=_gi(result, e.key)%></a>
+        <% }) %>
+      </nav>
+    </details>
+  </aside>
+
+  <!-- Colonne centrale — Contenu -->
+  <article class="docs-content">
+    <section id="overview" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-01')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-01-lead')%></p>
+
+      <h2 id="why"><%=_gi(result, 'docs-01-h-why')%></h2>
+      <p><%=_gi(result, 'docs-01-p-why')%></p>
+
+      <h2 id="stack"><%=_gi(result, 'docs-01-h-stack')%></h2>
+      <p><%=_gi(result, 'docs-01-p-stack')%></p>
+
+      <h2 id="when"><%=_gi(result, 'docs-01-h-when')%></h2>
+      <p><%=_gi(result, 'docs-01-p-when')%></p>
+
+      <figure class="docs-figure">
+        <wate-stack title="<%=_gi(result, 'docs-02-stack-title')%>" orientation="vertical">
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-client-l')%>"  sub="<%=_gi(result, 'docs-02-stack-client-s')%>"  tone="muted"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-express-l')%>" sub="<%=_gi(result, 'docs-02-stack-express-s')%>" tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-engine-l')%>"  sub="<%=_gi(result, 'docs-02-stack-engine-s')%>"  tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-sqlite-l')%>"  sub="<%=_gi(result, 'docs-02-stack-sqlite-s')%>"  tone="navy"></wate-stack-box>
+        </wate-stack>
+      </figure>
+    </section>
+
+    <section id="architecture" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-02')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-02-lead')%></p>
+
+      <h2 id="arch-stack"><%=_gi(result, 'docs-02-h-stack')%></h2>
+      <p><%=_gi(result, 'docs-02-p-stack')%></p>
+      <figure class="docs-figure">
+        <wate-stack title="<%=_gi(result, 'docs-02-stack-title')%>" orientation="horizontal">
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-client-l')%>"  sub="<%=_gi(result, 'docs-02-stack-client-s')%>"  tone="muted"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-express-l')%>" sub="<%=_gi(result, 'docs-02-stack-express-s')%>" tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-engine-l')%>"  sub="<%=_gi(result, 'docs-02-stack-engine-s')%>"  tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-02-stack-sqlite-l')%>"  sub="<%=_gi(result, 'docs-02-stack-sqlite-s')%>"  tone="navy"></wate-stack-box>
+        </wate-stack>
+      </figure>
+
+      <h2 id="arch-flow"><%=_gi(result, 'docs-02-h-flow')%></h2>
+      <p><%=_gi(result, 'docs-02-p-flow')%></p>
+      <figure class="docs-figure">
+        <wate-flow title="<%=_gi(result, 'docs-02-flow-title')%>" orientation="horizontal">
+          <wate-flow-step label="<%=_gi(result, 'docs-02-flow-recv-l')%>"   note="<%=_gi(result, 'docs-02-flow-recv-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-02-flow-page-l')%>"   note="<%=_gi(result, 'docs-02-flow-page-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-02-flow-item-l')%>"   note="<%=_gi(result, 'docs-02-flow-item-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-02-flow-i18n-l')%>"   note="<%=_gi(result, 'docs-02-flow-i18n-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-02-flow-render-l')%>" note="<%=_gi(result, 'docs-02-flow-render-n')%>"></wate-flow-step>
+        </wate-flow>
+      </figure>
+
+      <h2 id="arch-state"><%=_gi(result, 'docs-02-h-state')%></h2>
+      <p><%=_gi(result, 'docs-02-p-state')%></p>
+    </section>
+
+    <section id="engine" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-03')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-03-lead')%></p>
+
+      <h2 id="engine-init"><%=_gi(result, 'docs-03-h-init')%></h2>
+      <p><%=_gi(result, 'docs-03-p-init')%></p>
+
+      <h2 id="engine-options"><%=_gi(result, 'docs-03-h-options')%></h2>
+      <p><%=_gi(result, 'docs-03-p-options')%></p>
+
+      <h2 id="engine-lifecycle"><%=_gi(result, 'docs-03-h-lifecycle')%></h2>
+      <p><%=_gi(result, 'docs-03-p-lifecycle')%></p>
+      <figure class="docs-figure">
+        <wate-flow title="<%=_gi(result, 'docs-03-flow-title')%>" orientation="vertical">
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-require-l')%>" note="<%=_gi(result, 'docs-03-flow-require-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-init-l')%>"    note="<%=_gi(result, 'docs-03-flow-init-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-mig-l')%>"     note="<%=_gi(result, 'docs-03-flow-mig-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-mod-l')%>"     note="<%=_gi(result, 'docs-03-flow-mod-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-routes-l')%>"  note="<%=_gi(result, 'docs-03-flow-routes-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-03-flow-listen-l')%>"  note="<%=_gi(result, 'docs-03-flow-listen-n')%>"></wate-flow-step>
+        </wate-flow>
+      </figure>
+
+      <h2 id="engine-state"><%=_gi(result, 'docs-03-h-state')%></h2>
+      <p><%=_gi(result, 'docs-03-p-state')%></p>
+    </section>
+
+    <section id="modules" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-04')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-04-lead')%></p>
+
+      <h2 id="modules-syntax"><%=_gi(result, 'docs-04-h-syntax')%></h2>
+      <p><%=_gi(result, 'docs-04-p-syntax')%></p>
+
+      <h2 id="modules-engine"><%=_gi(result, 'docs-04-h-engine')%></h2>
+      <%-_gi(result, 'docs-04-p-engine')%>
+      <figure class="docs-figure">
+        <wate-stack title="<%=_gi(result, 'docs-04-stack-title')%>" orientation="horizontal">
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-auth-l')%>"  sub="<%=_gi(result, 'docs-04-stack-auth-s')%>"  tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-db-l')%>"    sub="<%=_gi(result, 'docs-04-stack-db-s')%>"    tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-stats-l')%>" sub="<%=_gi(result, 'docs-04-stack-stats-s')%>" tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-mail-l')%>"  sub="<%=_gi(result, 'docs-04-stack-mail-s')%>"  tone="muted"></wate-stack-box>
+        </wate-stack>
+        <wate-stack title="<%=_gi(result, 'docs-04-stack-title-2')%>" orientation="horizontal">
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-audit-l')%>"   sub="<%=_gi(result, 'docs-04-stack-audit-s')%>"   tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-search-l')%>"  sub="<%=_gi(result, 'docs-04-stack-search-s')%>"  tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-apikey-l')%>"  sub="<%=_gi(result, 'docs-04-stack-apikey-s')%>"  tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-04-stack-cron-l')%>"    sub="<%=_gi(result, 'docs-04-stack-cron-s')%>"    tone="navy"></wate-stack-box>
+        </wate-stack>
+      </figure>
+
+      <h2 id="modules-app"><%=_gi(result, 'docs-04-h-app')%></h2>
+      <p><%=_gi(result, 'docs-04-p-app')%></p>
+
+      <h2 id="modules-mail"><%=_gi(result, 'docs-04-h-mail')%></h2>
+      <p><%=_gi(result, 'docs-04-p-mail')%></p>
+    </section>
+
+    <section id="database" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-05')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-05-lead')%></p>
+
+      <h2 id="db-overview"><%=_gi(result, 'docs-05-h-overview')%></h2>
+      <p><%=_gi(result, 'docs-05-p-overview')%></p>
+
+      <h2 id="db-tables"><%=_gi(result, 'docs-05-h-tables')%></h2>
+      <p><%-_gi(result, 'docs-05-p-tables')%></p>
+      <figure class="docs-figure">
+        <wate-tree data='[
+          {"name":"_user",       "type":"file","note":"comptes (email, hash PBKDF2, profil_id)"},
+          {"name":"_session",    "type":"file","note":"sessions actives + ghost id=0"},
+          {"name":"_profil",     "type":"file","note":"rôles utilisateurs"},
+          {"name":"_access",     "type":"file","note":"droits par (profil, table, requête)"},
+          {"name":"_page",       "type":"file","note":"URL + profil → list_id"},
+          {"name":"_list",       "type":"file","note":"identifiant pur"},
+          {"name":"_item",       "type":"file","note":"template, css, queries, title"},
+          {"name":"_glossary",   "type":"file","note":"textes traduits par list_id"},
+          {"name":"_config",     "type":"file","note":"clé/valeur applicatives"},
+          {"name":"_user_token", "type":"file","note":"verify + reset (module auth)"},
+          {"name":"_stats",      "type":"file","note":"compteurs de vues (module stats)"},
+          {"name":"_audit",      "type":"file","note":"journal des écritures (module audit)"},
+          {"name":"_fts",        "type":"file","note":"index plein texte FTS5 (module search)"},
+          {"name":"_api_key",    "type":"file","note":"clés d&#39;API Bearer (module apikey)"}
+        ]'></wate-tree>
+      </figure>
+
+      <h2 id="db-content"><%=_gi(result, 'docs-05-h-content')%></h2>
+      <p><%=_gi(result, 'docs-05-p-content')%></p>
+      <figure class="docs-figure">
+        <wate-flow title="<%=_gi(result, 'docs-05-flow-title')%>" orientation="vertical">
+          <wate-flow-step label="<%=_gi(result, 'docs-05-flow-page-l')%>"     note="<%=_gi(result, 'docs-05-flow-page-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-05-flow-list-l')%>"     note="<%=_gi(result, 'docs-05-flow-list-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-05-flow-item-l')%>"     note="<%=_gi(result, 'docs-05-flow-item-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-05-flow-glossary-l')%>" note="<%=_gi(result, 'docs-05-flow-glossary-n')%>"></wate-flow-step>
+        </wate-flow>
+      </figure>
+
+      <h2 id="db-mcd"><%=_gi(result, 'docs-05-h-mcd')%></h2>
+      <p><%=_gi(result, 'docs-05-p-mcd')%></p>
+      <figure class="docs-figure">
+        <wate-mcd title="<%=_gi(result, 'docs-05-mcd-title')%>">
+          <%# Layout 2 colonnes × 4 lignes — _access seule en haut :
+              ligne 1 : _access    (col 2 vide ─ sert au routage de _list↔_glossary)
+              ligne 2 : _profil    _page
+              ligne 3 :            _list
+              ligne 4 : _glossary  _item                                   %>
+          <wate-table name="_access" row="1" col="1" cols='[
+            {"name":"profil_id","pk":1,"fk":"_profil"},
+            {"name":"tablename","pk":1},
+            {"name":"request_name","pk":1}
+          ]'></wate-table>
+
+          <wate-table name="_profil" row="2" col="1" cols='[
+            {"name":"id","pk":1},
+            {"name":"name"}
+          ]'></wate-table>
+          <wate-table name="_page" row="2" col="2" cols='[
+            {"name":"url","pk":1},
+            {"name":"profil_id","fk":"_profil"},
+            {"name":"list_id","fk":"_list"}
+          ]'></wate-table>
+
+          <wate-table name="_list" row="3" col="2" cols='[
+            {"name":"id","pk":1}
+          ]'></wate-table>
+
+          <wate-table name="_glossary" row="4" col="1" cols='[
+            {"name":"language","pk":1},
+            {"name":"name","pk":1},
+            {"name":"list_id","pk":1,"fk":"_list"},
+            {"name":"content"}
+          ]'></wate-table>
+          <wate-table name="_item" row="4" col="2" cols='[
+            {"name":"list_id","pk":1,"fk":"_list"},
+            {"name":"name","pk":1},
+            {"name":"value"}
+          ]'></wate-table>
+
+          <wate-link from="_page"   to="_profil" cardFrom="0,n" cardTo="1,1"></wate-link>
+          <wate-link from="_page"   to="_list"   cardFrom="0,n" cardTo="1,1"></wate-link>
+          <wate-link from="_item"   to="_list"   cardFrom="0,n" cardTo="1,1"></wate-link>
+          <wate-link from="_list"   to="_glossary" sideFrom="left" sideTo="top" cardFrom="1,1" cardTo="0,n"></wate-link>
+          <wate-link from="_access" to="_profil" cardFrom="0,n" cardTo="1,1"></wate-link>
+        </wate-mcd>
+      </figure>
+
+      <h2 id="db-access"><%=_gi(result, 'docs-05-h-access')%></h2>
+      <p><%=_gi(result, 'docs-05-p-access')%></p>
+
+      <h2 id="db-anon"><%=_gi(result, 'docs-05-h-anon')%></h2>
+      <p><%=_gi(result, 'docs-05-p-anon')%></p>
+    </section>
+
+    <!-- 12. API CRUD avancée -->
+    <section id="crud-api" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-12')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-12-lead')%></p>
+
+      <h2 id="crud-sort"><%=_gi(result, 'docs-12-h-sort')%></h2>
+      <%-_gi(result, 'docs-12-p-sort')%>
+
+      <h2 id="crud-filter"><%=_gi(result, 'docs-12-h-filter')%></h2>
+      <%-_gi(result, 'docs-12-p-filter')%>
+
+      <h2 id="crud-search"><%=_gi(result, 'docs-12-h-search')%></h2>
+      <%-_gi(result, 'docs-12-p-search')%>
+
+      <h2 id="crud-export"><%=_gi(result, 'docs-12-h-export')%></h2>
+      <%-_gi(result, 'docs-12-p-export')%>
+    </section>
+
+    <section id="writing-app" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-06')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-06-lead')%></p>
+
+      <h2 id="app-setup"><%=_gi(result, 'docs-06-h-setup')%></h2>
+      <p><%=_gi(result, 'docs-06-p-setup')%></p>
+      <figure class="docs-figure">
+        <wate-tree title="<%=_gi(result, 'docs-06-h-setup')%>" data='[
+          {"name":"app.js",     "type":"file","note":"point d entree — engine.init()"},
+          {"name":"site.db",    "type":"file","note":"base SQLite generee au demarrage"},
+          {"name":"migrations", "type":"dir", "note":"SQL execute dans l ordre","children":[
+            {"name":"001_app.sql","type":"file","note":"pages, glossaire, profils"}
+          ]},
+          {"name":"views",   "type":"dir","note":"templates EJS — surchargent le moteur","children":[
+            {"name":"common.ejs","type":"file"},
+            {"name":"home.ejs",  "type":"file"}
+          ]},
+          {"name":"css",     "type":"dir","note":"feuilles de style — surchargent le moteur"},
+          {"name":"scripts", "type":"dir","note":"JS client + modules applicatifs"},
+          {"name":"custom",  "type":"dir","note":"web components specifiques au site"}
+        ]'></wate-tree>
+      </figure>
+
+      <h2 id="app-page"><%=_gi(result, 'docs-06-h-page')%></h2>
+      <p><%=_gi(result, 'docs-06-p-page')%></p>
+      <figure class="docs-figure">
+        <wate-flow title="<%=_gi(result, 'docs-06-flow-title')%>" orientation="vertical">
+          <wate-flow-step label="<%=_gi(result, 'docs-06-flow-list-l')%>" note="<%=_gi(result, 'docs-06-flow-list-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-06-flow-item-l')%>" note="<%=_gi(result, 'docs-06-flow-item-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-06-flow-page-l')%>" note="<%=_gi(result, 'docs-06-flow-page-n')%>"></wate-flow-step>
+        </wate-flow>
+      </figure>
+
+      <h2 id="app-template"><%=_gi(result, 'docs-06-h-template')%></h2>
+      <p><%=_gi(result, 'docs-06-p-template')%></p>
+
+      <h2 id="app-i18n"><%=_gi(result, 'docs-06-h-i18n')%></h2>
+      <p><%=_gi(result, 'docs-06-p-i18n')%></p>
+
+      <h2 id="app-dynquery"><%=_gi(result, 'docs-06-h-dynquery')%></h2>
+      <p><%=_gi(result, 'docs-06-p-dynquery')%></p>
+    </section>
+
+    <section id="api" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-07')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-07-lead')%></p>
+
+      <h2 id="api-cms"><%=_gi(result, 'docs-07-h-cms')%></h2>
+      <p><%=_gi(result, 'docs-07-p-cms')%></p>
+
+      <h2 id="api-auth"><%=_gi(result, 'docs-07-h-auth')%></h2>
+      <p><%=_gi(result, 'docs-07-p-auth')%></p>
+
+      <h2 id="api-db"><%=_gi(result, 'docs-07-h-db')%></h2>
+      <p><%=_gi(result, 'docs-07-p-db')%></p>
+
+      <h2 id="api-stats"><%=_gi(result, 'docs-07-h-stats')%></h2>
+      <p><%=_gi(result, 'docs-07-p-stats')%></p>
+
+      <h2 id="api-wateapi"><%=_gi(result, 'docs-07-h-wateapi')%></h2>
+      <%-_gi(result, 'docs-07-p-wateapi')%>
+
+      <h2 id="api-create"><%=_gi(result, 'docs-07-h-create')%></h2>
+      <%-_gi(result, 'docs-07-p-create')%>
+
+      <h2 id="api-core"><%=_gi(result, 'docs-07-h-core')%></h2>
+      <%-_gi(result, 'docs-07-p-core')%>
+    </section>
+
+    <!-- 13. Modules audit et recherche -->
+    <section id="audit-search" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-13')%></h1>
+      <p class="docs-lead"><%-_gi(result, 'docs-13-lead')%></p>
+
+      <h2 id="mod-audit"><%=_gi(result, 'docs-13-h-audit')%></h2>
+      <%-_gi(result, 'docs-13-p-audit')%>
+
+      <h2 id="mod-search"><%=_gi(result, 'docs-13-h-search')%></h2>
+      <%-_gi(result, 'docs-13-p-search')%>
+    </section>
+
+    <section id="security" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-08')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-08-lead')%></p>
+
+      <h2 id="sec-csrf"><%=_gi(result, 'docs-08-h-csrf')%></h2>
+      <p><%=_gi(result, 'docs-08-p-csrf')%></p>
+
+      <h2 id="sec-pwd"><%=_gi(result, 'docs-08-h-pwd')%></h2>
+      <p><%=_gi(result, 'docs-08-p-pwd')%></p>
+
+      <h2 id="sec-sessions"><%=_gi(result, 'docs-08-h-sessions')%></h2>
+      <p><%=_gi(result, 'docs-08-p-sessions')%></p>
+
+      <h2 id="sec-access"><%=_gi(result, 'docs-08-h-access')%></h2>
+      <p><%=_gi(result, 'docs-08-p-access')%></p>
+      <figure class="docs-figure">
+        <wate-flow title="<%=_gi(result, 'docs-08-flow-title')%>" orientation="horizontal">
+          <wate-flow-step label="<%=_gi(result, 'docs-08-flow-cookie-l')%>" note="<%=_gi(result, 'docs-08-flow-cookie-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-08-flow-csrf-l')%>"   note="<%=_gi(result, 'docs-08-flow-csrf-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-08-flow-prof-l')%>"   note="<%=_gi(result, 'docs-08-flow-prof-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-08-flow-acc-l')%>"    note="<%=_gi(result, 'docs-08-flow-acc-n')%>"></wate-flow-step>
+          <wate-flow-step label="<%=_gi(result, 'docs-08-flow-mod-l')%>"    note="<%=_gi(result, 'docs-08-flow-mod-n')%>"></wate-flow-step>
+        </wate-flow>
+      </figure>
+
+      <h2 id="sec-xss"><%=_gi(result, 'docs-08-h-xss')%></h2>
+      <p><%=_gi(result, 'docs-08-p-xss')%></p>
+    </section>
+
+    <section id="i18n" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-09')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-09-lead')%></p>
+
+      <h2 id="i18n-glossary"><%=_gi(result, 'docs-09-h-glossary')%></h2>
+      <p><%=_gi(result, 'docs-09-p-glossary')%></p>
+
+      <h2 id="i18n-scope"><%=_gi(result, 'docs-09-h-scope')%></h2>
+      <p><%=_gi(result, 'docs-09-p-scope')%></p>
+
+      <h2 id="i18n-lang"><%=_gi(result, 'docs-09-h-lang')%></h2>
+      <p><%=_gi(result, 'docs-09-p-lang')%></p>
+
+      <h2 id="i18n-gi"><%=_gi(result, 'docs-09-h-gi')%></h2>
+      <p><%=_gi(result, 'docs-09-p-gi')%></p>
+    </section>
+
+    <section id="custom-elements" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-10')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-10-lead')%></p>
+
+      <h2 id="ce-base"><%=_gi(result, 'docs-10-h-base')%></h2>
+      <p><%=_gi(result, 'docs-10-p-base')%></p>
+
+      <h2 id="ce-engine"><%=_gi(result, 'docs-10-h-engine')%></h2>
+      <p><%=_gi(result, 'docs-10-p-engine')%></p>
+      <figure class="docs-figure">
+        <wate-stack title="<%=_gi(result, 'docs-10-stack-engine-title')%>" orientation="vertical">
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-row-l')%>"    sub="<%=_gi(result, 'docs-10-stack-row-s')%>"    tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-list-l')%>"   sub="<%=_gi(result, 'docs-10-stack-list-s')%>"   tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-schema-l')%>" sub="<%=_gi(result, 'docs-10-stack-schema-s')%>" tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-icon-l')%>"   sub="<%=_gi(result, 'docs-10-stack-icon-s')%>"   tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-image-l')%>"  sub="<%=_gi(result, 'docs-10-stack-image-s')%>"  tone="navy"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-modal-l')%>"  sub="<%=_gi(result, 'docs-10-stack-modal-s')%>"  tone="navy"></wate-stack-box>
+        </wate-stack>
+      </figure>
+
+      <h2 id="ce-site"><%=_gi(result, 'docs-10-h-site')%></h2>
+      <p><%=_gi(result, 'docs-10-p-site')%></p>
+      <figure class="docs-figure">
+        <wate-stack title="<%=_gi(result, 'docs-10-stack-site-title')%>" orientation="vertical">
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-card-l')%>" sub="<%=_gi(result, 'docs-10-stack-card-s')%>" tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-stk-l')%>"  sub="<%=_gi(result, 'docs-10-stack-stk-s')%>"  tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-flow-l')%>" sub="<%=_gi(result, 'docs-10-stack-flow-s')%>" tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-tree-l')%>" sub="<%=_gi(result, 'docs-10-stack-tree-s')%>" tone="orange"></wate-stack-box>
+          <wate-stack-box label="<%=_gi(result, 'docs-10-stack-mcd-l')%>"  sub="<%=_gi(result, 'docs-10-stack-mcd-s')%>"  tone="orange"></wate-stack-box>
+        </wate-stack>
+      </figure>
+
+      <h2 id="ce-override"><%=_gi(result, 'docs-10-h-override')%></h2>
+      <p><%=_gi(result, 'docs-10-p-override')%></p>
+    </section>
+
+    <section id="deployment" class="docs-section">
+      <h1><%=_gi(result, 'docs-toc-11')%></h1>
+      <p class="docs-lead"><%=_gi(result, 'docs-11-lead')%></p>
+
+      <h2 id="deploy-reverse-proxy"><%=_gi(result, 'docs-11-h-proxy')%></h2>
+      <%-_gi(result, 'docs-11-p-proxy')%>
+
+      <h2 id="deploy-process"><%=_gi(result, 'docs-11-h-process')%></h2>
+      <%-_gi(result, 'docs-11-p-process')%>
+
+      <h2 id="deploy-docker"><%=_gi(result, 'docs-11-h-docker')%></h2>
+      <%-_gi(result, 'docs-11-p-docker')%>
+
+      <h2 id="deploy-backup"><%=_gi(result, 'docs-11-h-backup')%></h2>
+      <%-_gi(result, 'docs-11-p-backup')%>
+
+      <h2 id="deploy-env"><%=_gi(result, 'docs-11-h-env')%></h2>
+      <%-_gi(result, 'docs-11-p-env')%>
+    </section>
+
+
+  </article>
+
+</div>
+
+<%# Scrollspy : marque le lien TOC actif selon la section visible. %>
+<script type="module"<% if(nonce) { %> nonce="<%=nonce%>"<% } %>>
+  // Map id de section → lien TOC correspondant (href="#id")
+  const tocLinks  = document.querySelectorAll('.docs-toc-link[href^="#"]')
+  const linksById = {}
+  tocLinks.forEach(a => { linksById[a.getAttribute('href').slice(1)] = a })
+
+  // Sections de niveau 1 uniquement (chaque <section id="..."> direct dans .docs-content)
+  const sections = document.querySelectorAll('.docs-content > section[id]')
+
+  // IntersectionObserver : on retient la section dont le top est le plus
+  // proche (sans le dépasser) du seuil. rootMargin pousse le seuil sous
+  // le header sticky pour suivre le scroll naturel.
+  let current = null
+  function setActive(id) {
+    if(id === current) return
+    current = id
+    tocLinks.forEach(a => { a.classList.remove('is-active') })
+    if(linksById[id]) linksById[id].classList.add('is-active')
+  }
+
+  const io = new IntersectionObserver(entries => {
+    // Récupère toutes les sections visibles et prend celle dont le top est
+    // le plus haut (celle qu'on est en train de lire).
+    const visible = entries.filter(e => e.isIntersecting)
+    if(!visible.length) return
+    visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+    setActive(visible[0].target.id)
+  }, {
+    rootMargin: '-80px 0px -60% 0px',  // header sticky 80px en haut, 60% du bas ignoré
+    threshold: 0
+  })
+  sections.forEach(s => { io.observe(s) })
+</script>
+
+<%# (WaTE) web/views/site-docs.ejs v1.13.1 %>

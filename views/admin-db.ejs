@@ -1,0 +1,207 @@
+<%
+/**
+ * \file      (WaTE) admin-db.ejs
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      03/11/2023
+ * \version   7.0.1
+ * \brief     Interface DB de l'administration WaTE — deux modes selon `table`.
+ *
+ * \details   table=null  → mode schema : liste des tables accessibles.
+ *            table='...' → mode CRUD   : tableau éditable de la table.
+ *            Surchargeable par l'application : placer views/admin-db.ejs dans app/views/.
+ *
+ *            v1.0.0 : mode schema uniquement (liste des tables accessibles).
+ *            v2.0.0 : fusion admin-data.ejs → admin-db.ejs (supprimé).
+ *                     Mode unifié : table=null → schema, table='...' → CRUD.
+ *            v3.0.0 : mode CRUD — custom element <admin-row> via customHTMLElement.create.
+ *                     Colonnes FK → <fktable-list> définis par adminList (fetch async).
+ *            v4.0.0 : template <admin-row> et colonnes FK générés côté serveur par EJS.
+ *                     adminList() → adminListStatic() : options baked-in, plus de fetch.
+ *                     Tout le code JS (collectBody, load, renderRows…) inline dans l'EJS.
+ *            v4.1.0 : CSS page — couleurs WaTE (#002147 / #f0a500), layout centré, boutons 3D.
+ *                     CSS shadow <admin-row> dans custom/admin-row/def.css (@import).
+ *                     Bouton "+ Insérer" dans <th>Actions</th>.
+ *                     PK saisissable en insert : <input class="pk-input" placeholder="auto">.
+ *                     CSS liste FK dans custom/admin-list/def.css (@import).
+ *            v5.0.0 : tout le JS statique déplacé dans scripts/admin-row.js v2.0.0.
+ *            v5.1.0 : FIX colonnes PK+FK — dropdown rendu en priorité sur l'input texte.
+ *            v5.2.0 : Fragment pur — boilerplate HTML retiré (géré par common.ejs).
+ *            v5.3.0 : user dérivé de result['_user'].rows[0] — plus de jsHandler renderSchema.
+ *                     list 101 fournit result['_user'] pour schema, table et me.
+ *                     Chargé via elements.template='admin-db' + include dans common.ejs.
+ *                     Attribut class="pk-fk" sur le custom element pour désactivation côté JS.
+ *                     Seuls les fragments EJS-dépendants restent inline :
+ *                       - TABLE = {name, cols} (baked-in depuis route).
+ *                       - template shadow HTML de <admin-row> (colonnes générées par EJS).
+ *                       - include conditionnel de admin-list.ejs si colonnes FK présentes.
+ *                     admin-row.js exporte adminRowBind(TABLE) et init(TABLE).
+ *            v5.4.0 : db:renderTable supprimé — données PRAGMA depuis result (list 5 queries).
+ *            v5.5.0 : h1→h2 (h1 "Administration" dans l'entête commun).
+ *            v5.6.0 : nav-info "← Tables / ← Mon profil" retiré — navigation
+ *                     assurée par le menu logo dans l'entête (common.ejs v1.3.0).
+ *                     User email/profil retirés du <p> — affichés dans .header-user (common.ejs).
+ *                     table = req.query.table (query param, URL /admin/form/db?table=name).
+ *                     columns construit depuis result['_columns']/_fk/_meta en EJS.
+ *                     fkOptions construit depuis result['_fk_<table>'] (queries list 5).
+ *                     admin-list.ejs inchangé — toujours server-side avec fkOptions baked-in.
+ *                     Lien schema mode : /admin/form/db?table=name (query param).
+ *            v5.7.0 : toutes les chaînes UI via _gi() — db-* glossaire (001_engine.sql).
+ *            v5.8.0 : TABLE.confirmDelete = _gi('db-confirm-delete') — supprime chaîne
+ *                     française hardcodée dans admin-row.js confirm().
+ *            v6.0.0 : mode CRUD migré vers custom/admin-row/def.js + scripts/admin-db.js.
+ *                     Suppression du template EJS inline pour <admin-row> et de l'include
+ *                     admin-list.ejs. import admin-row.js retiré.
+ *                     TABLE enrichi de titleEdit + titleDelete (via _gi).
+ *                     fkOptions passé en JSON à init(TABLE, fkOptions).
+ *            v7.0.0 : mode schema rendu server-side — plus de fetch /admin/api/db/schema.
+ *                     Queries _schema (sqlite_master) et _allowed (_access JOIN session)
+ *                     définies dans _item list 4 (001_engine.sql). Intersection +
+ *                     parsing DDL (colonnes, PK, FK) faits en EJS. <schema-table>
+ *                     émis directement avec ses attributs ; le custom element hydrate.
+ *            v7.0.1 : FIX XSS — JSON.stringify().replace(/\//g, '\\/') dans les blocs
+ *                     <script> pour neutraliser </script> dans les valeurs injectées.
+ */
+%>
+<%
+  var user = (result['_user'] && result['_user'].rows && result['_user'].rows[0]) || null
+  var table = req.query.table || null
+
+  // Table demandée mais PRAGMA vide → table inconnue → 404 + next schema
+  if(table && (!result['_columns'] || !result['_columns'].rows || result['_columns'].rows.length === 0)) {
+    httpError(req, res, 404, 'Table not found', '/admin/form/db/schema'); return
+  }
+
+  // ── Colonnes CRUD depuis résultats PRAGMA (list 5 queries) ───────────────────
+  var _fkMap = {}
+  ;((result['_fk'] || {}).rows || []).forEach(function(fk) { _fkMap[fk.from] = { table: fk.table } })
+  var _metaSql = (((result['_meta'] || {}).rows || [])[0] || {}).sql || ''
+  var columns = ((result['_columns'] || {}).rows || []).map(function(c) {
+    var autoRe = new RegExp('\\b' + c.name + '\\b[^,)]*\\bAUTOINCREMENT\\b', 'i')
+    return { name: c.name, type: c.type, pk: c.pk, auto: autoRe.test(_metaSql), notnull: c.notnull, fk: _fkMap[c.name] || null }
+  })
+
+  // ── fkOptions depuis result['_fk_<table>'] (queries list 5 + app) ────────────
+  // Chaque table FK référencée doit avoir une query "_fk_<basename>" dans _item.
+  // Ex : _profil → "_fk_profil", _lang → "_fk_lang". La première colonne est la PK,
+  // la seconde (si présente) est le libellé. Les tables engine courantes sont dans list 5.
+  // Les tables applicatives FK sont à ajouter dans les listes applicatives.
+  var fkOptions = {}
+  ;((result['_fk'] || {}).rows || []).forEach(function(fk) {
+    if(fkOptions[fk.table]) return
+    fkOptions[fk.table] = {}
+    var resultKey = '_fk_' + fk.table.replace(/^_/, '')
+    ;((result[resultKey] || {}).rows || []).forEach(function(r) {
+      var keys = Object.keys(r)
+      if(!keys.length) return
+      var k = r[keys[0]], v = keys.length > 1 ? r[keys[1]] : k
+      fkOptions[fk.table][String(k)] = String(v == null ? k : v)
+    })
+  })
+%>
+  <h2><% if(table) { %><code><%=table%></code><% } else { %><%=_gi(result, 'db-title')%><% } %></h2>
+
+<% if(!table) { %>
+
+  <%# ── Mode schema : grille server-side — tables accessibles parsées depuis DDL ─────── %>
+  <h2><%=_gi(result, 'db-tables')%></h2>
+
+  <%
+    // Intersection : schéma complet ∩ tables en select pour le profil courant.
+    var allowedSet = {}
+    ;((result['_allowed'] || {}).rows || []).forEach(function(r) { allowedSet[r.name] = true })
+
+    // Parsing DDL — extrait { name, pk, fk } par colonne depuis CREATE TABLE.
+    // Couvre : "col TYPE … PRIMARY KEY", "PRIMARY KEY(col,…)",
+    //         "FOREIGN KEY(col) REFERENCES t(…)", "col TYPE REFERENCES t(…)".
+    function _parseDDL(sql) {
+      if(!sql) return []
+      var body = sql.slice(sql.indexOf('(') + 1, sql.lastIndexOf(')'))
+      var parts = [], depth = 0, buf = ''
+      for(var i = 0; i < body.length; i++) {
+        var ch = body[i]
+        if(ch === '(') depth++
+        else if(ch === ')') depth--
+        if(ch === ',' && depth === 0) { parts.push(buf.trim()); buf = '' }
+        else buf += ch
+      }
+      if(buf.trim()) parts.push(buf.trim())
+
+      var cols = [], pkSet = {}, fkMap = {}
+      var kwRe = /^(PRIMARY|FOREIGN|UNIQUE|CHECK|CONSTRAINT)\b/i
+      var strip = function(s) { return s.trim().replace(/["`\[\]]/g, '') }
+
+      parts.forEach(function(p) {
+        var m
+        if(/^PRIMARY\s+KEY\s*\(([^)]+)\)/i.test(p)) {
+          RegExp.$1.split(',').forEach(function(c) { pkSet[strip(c)] = true })
+        } else if((m = p.match(/^FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+["`\[]?(\w+)/i))) {
+          m[1].split(',').forEach(function(c) { fkMap[strip(c)] = m[2] })
+        } else if(!kwRe.test(p)) {
+          var cm = p.match(/^["`\[]?(\w+)["`\]]?\s+/); if(!cm) return
+          var name = cm[1]
+          if(/\bPRIMARY\s+KEY\b/i.test(p)) pkSet[name] = true
+          var refM = p.match(/\bREFERENCES\s+["`\[]?(\w+)/i)
+          if(refM) fkMap[name] = refM[1]
+          cols.push(name)
+        }
+      })
+
+      return cols.map(function(n) { return { name: n, pk: pkSet[n] ? 1 : 0, fk: fkMap[n] || null } })
+    }
+
+    var tables = ((result['_schema'] || {}).rows || [])
+      .filter(function(t) { return allowedSet[t.name] })
+      .map(function(t) { return { name: t.name, columns: _parseDDL(t.sql) } })
+  %>
+
+  <% if(tables.length === 0) { %>
+    <p class="db-empty"><%=_gi(result, 'db-empty')%></p>
+  <% } else { %>
+    <div id="schema-grid">
+<%    tables.forEach(function(t) { %>
+      <schema-table name="<%=t.name%>" href="/admin/form/db?table=<%=encodeURIComponent(t.name)%>&amp;lang=<%=lang%>" cols='<%-JSON.stringify(t.columns).replace(/'/g, "&#39;")%>'></schema-table>
+<%    }) %>
+    </div>
+  <% } %>
+
+  <% if(nonce) { %><script type="module" nonce="<%=nonce%>"><% } else { %><script type="module"><% } %>
+    import '/custom/schema-table/def.js'
+  </script>
+
+<% } else { %>
+
+  <%# ── Mode CRUD : custom element <admin-row> généré côté serveur ─────────── %>
+  <div id="toolbar">
+    <span id="pagination"></span>
+    <span id="data-error"></span>
+  </div>
+
+  <div class="data">
+    <table id="data-table">
+      <thead id="data-head">
+        <tr>
+<%  columns.forEach(function(c) { %>
+          <th><% if(c.pk) { %>&#x1F511; <% } else if(c.fk) { %>&#x1F517; <% } %><%=c.name%></th>
+<%  }) %>
+          <th><button id="btn-insert" title="<%=_gi(result, 'db-insert-title')%>"><%=_gi(result, 'db-insert')%></button></th>
+        </tr>
+      </thead>
+      <tbody id="data-body"></tbody>
+    </table>
+  </div>
+
+  <% if(nonce) { %><script type="module" nonce="<%=nonce%>"><% } else { %><script type="module"><% } %>
+    import '/custom/admin-row/def.js'
+    import { init } from '/scripts/admin-db.js'
+    // Note : table validé par _RE_TABLE dans _data.modify (pas de balise Script possible)
+    const TABLE     = {name: <%- JSON.stringify(table).replace(/\//g, '\\/') %>, cols: <%- JSON.stringify(columns).replace(/\//g, '\\/') %>,
+                       confirmDelete: <%- JSON.stringify(_gi(result, 'db-confirm-delete')).replace(/\//g, '\\/') %>,
+                       titleEdit:     <%- JSON.stringify(_gi(result, 'db-edit')).replace(/\//g, '\\/') %>,
+                       titleDelete:   <%- JSON.stringify(_gi(result, 'db-delete')).replace(/\//g, '\\/') %>}
+    const fkOptions = <%- JSON.stringify(fkOptions).replace(/\//g, '\\/') %>
+    init(TABLE, fkOptions)
+  </script>
+
+<% } %>
+<%# admin-db.ejs v7.0.1 %>

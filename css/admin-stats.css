@@ -1,0 +1,97 @@
+/**
+ * \file      (WaTE) css/admin-stats.css
+ * \author    Romain Légault
+ * \copyright 2023-2026 WATE Team.
+ * \date      16/04/2026
+ * \version   1.0.0
+ * \brief     Style spécifique à la page de statistiques LRU (admin-stats.ejs).
+ *
+ * \details   Complète common.css (h2, a, p.nav-info déjà définis).
+ */
+
+/* ── Tableau des stats ───────────────────────────────────────────────────── */
+
+.stats-table {
+  border-collapse: separate;
+  border-spacing: 1px 2px;
+  min-width: 320px; max-width: 100%;
+  background-color: rgba(255,255,255,0.04);
+  border: 2px solid #f0a500;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stats-table th {
+  background-color: #001633;
+  color: #f0a500;
+  font: bold 0.833rem Verdana, sans-serif;
+  padding: 6px 12px;
+  border-bottom: 2px solid #f0a500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stats-table td {
+  padding: 6px 12px;
+  color: #c8ddf0;
+  text-align: center;
+}
+
+.stats-table tbody tr:nth-child(even) { background-color: rgba(255,255,255,0.07); }
+.stats-table tbody tr:nth-child(odd)  { background-color: rgba(255,255,255,0.02); }
+
+.cache-name {
+  font-family: monospace;
+  font-size: 0.833rem;
+  color: #fff;
+  text-align: left !important;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* ── Barre de ratio hit/miss ─────────────────────────────────────────────── */
+
+.ratio-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.ratio-bar {
+  width: 80px;
+  height: 10px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ratio-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+
+.ratio-pct {
+  font-size: 0.75rem;
+  color: #c8ddf0;
+  min-width: 3em;
+  text-align: right;
+}
+
+/* ── Messages et bouton ──────────────────────────────────────────────────── */
+
+.stats-note {
+  color: #8ab;
+  font-size: 0.75rem;
+  margin-top: 1em;
+  text-align: center;
+}
+
+.stats-loading, .stats-empty { color: #c8ddf0; }
+.stats-error { color: #ff8080; }
+
+#btn-refresh { margin-top: 0.6em; }
+
+/* (WaTE) css/admin-stats.css v1.0.1 */
