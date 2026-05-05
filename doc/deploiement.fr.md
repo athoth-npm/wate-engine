@@ -71,6 +71,7 @@ Nommage : `NNN_<scope>_<desc>.sql`. Scope `engine` toujours exécuté. `auth`, `
 | `004_auth_token.sql` | `auth` | Table `_user_token` + verify/reset |
 | `005_audit_audit.sql` | `audit` | Table `_audit` |
 | `006_search_search.sql` | `search` | Table virtuelle FTS5 `_fts` + triggers |
+| `007_apikey.sql` | `apikey` | Table `_api_key` |
 
 ---
 
@@ -79,5 +80,5 @@ Nommage : `NNN_<scope>_<desc>.sql`. Scope `engine` toujours exécuté. `auth`, `
 - [README](../README.fr.md) — Vue d'ensemble
 - [Architecture](architecture.fr.md) — Moteur interne
 - [API Reference](api.fr.md) — Routes & modules
+- [Modules](module.fr.md) — Création de modules applicatifs
 - [CHANGELOG](../CHANGELOG.fr.md) — Historique des versions
-| `007_apikey_apikey.sql` | `apikey` | Table `_api_key` |

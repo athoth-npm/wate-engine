@@ -104,6 +104,7 @@ Naming: `NNN_<scope>_<desc>.sql`. Scope `engine` always runs. `auth`, `db`, `sta
 | `004_auth_token.sql` | `auth` | `_user_token` table + verify/reset |
 | `005_audit_audit.sql` | `audit` | `_audit` table |
 | `006_search_search.sql` | `search` | `_fts` FTS5 virtual table + triggers |
+| `007_apikey.sql` | `apikey` | `_api_key` table |
 
 ---
 
@@ -112,5 +113,5 @@ Naming: `NNN_<scope>_<desc>.sql`. Scope `engine` always runs. `auth`, `db`, `sta
 - [README](../README.md) — Project overview
 - [Architecture](architecture.md) — Engine internals
 - [API Reference](api.md) — Routes & modules
+- [Modules](module.md) — Application module creation
 - [CHANGELOG](../CHANGELOG.md) — Version history
-| `007_apikey_apikey.sql` | `apikey` | `_api_key` table |

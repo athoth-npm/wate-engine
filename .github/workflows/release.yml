@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Patch sqlite3 for Node 18+
         run: |
@@ -40,6 +41,15 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           sed -n "/## \[v$VERSION\]/,/^## \[/p" CHANGELOG.md | sed '$d' > release-body.md
           cat release-body.md
+
+      - name: Revert sqlite3 patch (restore package.json)
+        run: |
+          sed -i 's/"sqlite3": "5.1.7"/"sqlite3": "4.0.0"/' package.json
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

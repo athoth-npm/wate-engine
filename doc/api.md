@@ -125,16 +125,17 @@ Response: `{ results: [{ source, tag, text, snippet, urls }] }`. Module `--mod s
 
 ## Hooks
 
-**`tableHooks`** — Intercept INSERT/UPDATE/DELETE:
+**`api.hooks.onTableWrite(table, action, callback)`** — Intercept INSERT/UPDATE/DELETE:
 ```javascript
-_data.registerTableWriteHook('tableName', 'insert', function(req, next) {
-  // modify req.body, then call next() or next(err)
+api.hooks.onTableWrite('tableName', 'insert', (req, next) => {
+  // modify req.body in place, then call next()
+  // call next(new Error('message')) to abort the write
 })
 ```
 
-**`getTableWriteHook(table, action)`** — Retrieve existing hook (for wrapping, used by audit).
+**`api.hooks.getTableWriteHook(table, action)`** — Retrieve existing hook (for chaining, used by audit).
 
-**`pageLoadHooks`** — Inject data before EJS render via `_item` key `HOOK`.
+**`api.hooks.onPageLoad(name, callback)`** — Inject data before EJS render via `_item` key `HOOK`.
 
 ## Core Functions
 
@@ -194,14 +195,6 @@ The `_WATE_API` object is passed to every module's `init(api)` function. It prov
 | `api.renderError(req, res, code, msg, nextUrl?)` | `Function` | Renders an error page |
 | `api.hooks.onPageLoad(name, callback)` | `Function` | Registers a page load hook |
 | `api.hooks.onTableWrite(table, action, callback)` | `Function` | Registers a table write hook |
-
-### `api.executeAction(action, params)`
-
-Executes a whitelisted action on the engine. Returns `Promise`.
-
-### `api.getTableWriteHook(table, action)`
-
-Returns the existing hook for `(table, action)`. Useful for chaining without overwriting (pattern used by the audit module).
 
 ## Module System
 

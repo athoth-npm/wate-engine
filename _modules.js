@@ -3,10 +3,12 @@
  * \author    Romain Légault
  * \copyright 2023-2026 WATE Team.
  * \date      03/11/2023
- * \version   1.3.4
+ * \version   1.3.5
  * \brief     Module engine WaTE — chargement des modules externes.
  *
- * \details   Syntaxe unifiée (--mod et --ejs) : name[:alias][=param].
+ * \details   v1.3.5 : @typedef _WATE_API aligné sur l'objet réel (renderPage, renderError,
+ *                     db, hooks). Retrait des propriétés inexistantes. load() Doxygen corrigé.
+ *            Syntaxe unifiée (--mod et --ejs) : name[:alias][=param].
  *            v1.0.1 : injection _core pour variables globales.
  *            v1.1.0 : _WATE_API (façade pour modules applicatifs).
  *            v1.2.0 : parseNames() — extraction noms sans chargement.
@@ -48,39 +50,29 @@ const _ENGINE_MODS = ['auth', 'db', 'stats', 'log', 'utils', 'mail', 'audit', 's
  *   app.locals.jsHandlers  : handlers JS côté client.
  *   app.locals.SESSION_TTL_S : TTL de session en secondes.
  *
- * @property {Function} serve
- *   Référence à _data.serve(req, res). Utilisable pour créer des routes
- *   qui s'appuient sur le rendu WaTE standard.
+ * @property {Object} hooks
+ *   Registre des hooks.
+ *   @property {Function} hooks.onPageLoad(name, callback)
+ *     Injecte des données avant le rendu EJS d'une page.
+ *     @param {string}   name     - Nom du hook.
+ *     @param {Function} callback - function(req, elements).
+ *   @property {Function} hooks.onTableWrite(tableName, action, callback)
+ *     Intercepte INSERT/UPDATE/DELETE sur une table.
+ *     @param {string}   tableName - Nom de la table.
+ *     @param {string}   action    - 'insert' | 'update' | 'delete'.
+ *     @param {Function} callback  - function(req, next) appelée avant l'écriture.
  *
- * @property {Function} modify
- *   Référence à _data.modify(req, res, table, action).
+ * @property {Function} renderPage(req, res, targetUrl?, extraData?)
+ *   Force le rendu d'une page DB via _data.serve().
  *
- * @property {Function} registerTableWriteHook
- *   @param {string}   table  - Nom de la table.
- *   @param {string}   action - 'insert' | 'update' | 'delete'.
- *   @param {Function} hook   - function(req, next) appelée avant l'écriture.
+ * @property {Function} renderError(req, res, code, msg, nextUrl?)
+ *   Force le rendu d'une page d'erreur.
  *
- * @property {Function} getTableWriteHook
- *   Retourne le hook existant pour (table, action). Utile pour enchaîner
- *   sans écraser (pattern utilisé par le module audit).
- *   @param {string} table
- *   @param {string} action
- *   @returns {Function|undefined}
- *
- * @property {Function} registerPageLoadHook
- *   Injecte des données supplémentaires avant le rendu EJS d'une page.
- *   @param {string}   key  - Clé _item identifiant le hook ('HOOK').
- *   @param {Function} hook - function(req, data, next).
- *
- * @property {Function} unregisterPageLoadHook
- *   Supprime un hook de chargement (utilisé entre deux appels init() en tests).
- *   @param {string} key
- *
- * @property {Function} executeAction
- *   Exécute une action whitelistée sur le moteur.
- *   @param {string} action - Nom de l'action autorisée.
- *   @param {Object} params
- *   @returns {Promise}
+ * @property {Object} db
+ *   Accès direct à la base de données (read-only).
+ *   @property {Function} db.run(sql, params, callback)
+ *   @property {Function} db.all(sql, params, callback)
+ *   @property {Function} db.get(sql, params, callback)
  *
  * @property {Object} log
  *   Logger interne. Méthodes : log.INFO(msg), log.WARN(msg), log.ERROR(msg).
@@ -152,13 +144,13 @@ const _WATE_API = {
  * avec un timeout de 5 secondes. Enregistre module.done() pour le shutdown propre.
  * Les noms de module sont validés contre /^[a-zA-Z0-9_-]+$/ (anti path-traversal).
  *
- * @param {string}   name   - Nom du module (ex: 'auth', 'db', 'audit').
- * @param {string}  [param] - Paramètre optionnel passé à init() (ex: TTL pour auth).
- * @param {WateAPI}  api    - API moteur injectée dans le module.
+ * @param {string}   flag     - Type de module : 'mod' | 'ejs'.
+ * @param {string}  [rawInput] - Entrée brute (ex: 'auth=3600' ou 'auth,db').
+ * @param {string}   appPath  - Chemin racine de l'application (pour résoudre les modules locaux).
  *
- * @returns {Promise<void>} Résolu quand init() du module est terminé.
- * @throws {Error} Si le nom contient '..', le module est introuvable,
- *                 ou si init() dépasse le timeout de 5 secondes.
+ * @returns {Promise<Object>} Objet { alias: module } contenant les modules chargés.
+ * @throws {Error} Si un nom contient '..', le module est introuvable,
+ *                 ou si init() dépasse le timeout de 10 secondes.
  */
 function load(flag, rawInput, appPath) { return new Promise((resolve, reject) => {
   _core.log.print(_core.log.RUN, 'ENTER _modules.load(' + flag + ')')

@@ -195,14 +195,6 @@ L'objet `_WATE_API` est passé à la fonction `init(api)` de chaque module. Il d
 | `api.hooks.onPageLoad(name, callback)` | `Function` | Enregistre un hook de chargement de page |
 | `api.hooks.onTableWrite(table, action, callback)` | `Function` | Enregistre un hook d'écriture sur table |
 
-### `api.executeAction(action, params)`
-
-Exécute une action whitelistée sur le moteur. Retourne `Promise`.
-
-### `api.getTableWriteHook(table, action)`
-
-Retourne le hook existant pour `(table, action)`. Utile pour chaîner sans écraser (pattern utilisé par le module audit).
-
 ## Système de modules
 
 Les modules sont chargés via `_modules.load(flag, rawInput, appPath)`. La syntaxe unifiée pour `--mod` et `--ejs` est :

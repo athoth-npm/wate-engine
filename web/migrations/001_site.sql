@@ -3,10 +3,12 @@
  * \author    Romain Légault
  * \copyright 2023-2026 WATE Team.
  * \date      2026-04-26
- * \version   1.9.0
+ * \version   1.9.1
  * \brief     Migration initiale du site vitrine WaTE.
  *
- * \details   Pages :
+ * \details   v1.9.1 : Section 7.5 _WATE_API alignée sur l''objet réel (retrait executeAction,
+ *                     getTableWriteHook). 7.7 renommé « Pipeline de rendu et d''écriture ».
+ *            Pages :
  *              - /         → template site-home,     css common.css,  accès anonymous.
  *              - /examples → template site-examples, css examples.css
  *              - /docs     → template site-docs,     css docs.css
@@ -877,10 +879,10 @@ INSERT INTO _glossary VALUES ('fr', 'docs-07-title', 'API des modules', 202);
 INSERT INTO _glossary VALUES ('en', 'docs-07-title', 'Module API',      202);
 
 INSERT INTO _glossary VALUES ('fr', 'docs-07-lead',
-  'Routes HTTP, API développeur (_WATE_API), création de modules applicatifs et fonctions cœur du moteur (serve/modify). Les modules reçoivent une API sécurisée qui donne accès à Express, la base de données, le rendu de pages et le système de hooks.',
+  'Routes HTTP, API développeur (_WATE_API), création de modules applicatifs. Les modules reçoivent une API sécurisée qui donne accès à Express, la base de données, le rendu de pages et le système de hooks.',
   202);
 INSERT INTO _glossary VALUES ('en', 'docs-07-lead',
-  'HTTP routes, developer API (_WATE_API), application module creation, and core engine functions (serve/modify). Modules receive a secure API that provides access to Express, the database, page rendering, and the hook system.',
+  'HTTP routes, developer API (_WATE_API), application module creation. Modules receive a secure API that provides access to Express, the database, page rendering, and the hook system.',
   202);
 
 -- 7.1 Routes CMS toujours présentes
@@ -927,10 +929,10 @@ INSERT INTO _glossary VALUES ('en', 'docs-07-p-stats',
 INSERT INTO _glossary VALUES ('fr', 'docs-07-h-wateapi', 'Interface _WATE_API', 202);
 INSERT INTO _glossary VALUES ('en', 'docs-07-h-wateapi', '_WATE_API interface', 202);
 INSERT INTO _glossary VALUES ('fr', 'docs-07-p-wateapi',
-  '<p>Chaque module reçoit l''objet <code>api</code> en argument de <code>init(param, api)</code>. Il donne accès aux primitives du moteur sans exposer ses internes :</p> <ul> <li><code>api.app</code> — instance Express partagée. <code>app.locals</code> contient <code>tableHooks</code>, <code>jsHandlers</code> et <code>SESSION_TTL_S</code></li> <li><code>api.log</code> — logger avec méthodes <code>.INFO()</code>, <code>.WARN()</code>, <code>.ERROR()</code></li> <li><code>api.db.run(sql, params, cb)</code> / <code>.all()</code> / <code>.get()</code> — requêtes SQL paramétrées, protégées via placeholders <code>?</code></li> <li><code>api.renderPage(req, res, targetUrl?, extraData?)</code> — force le rendu d''une page DB via le pipeline <code>serve()</code> standard</li> <li><code>api.renderError(req, res, code, msg, nextUrl?)</code> — affiche une page d''erreur standard</li> <li><code>api.hooks.onPageLoad(name, callback)</code> — injecte des données avant le rendu EJS. La clé doit correspondre à <code>_item.HOOK</code></li> <li><code>api.hooks.onTableWrite(table, action, callback)</code> — intercepte INSERT/UPDATE/DELETE. Le callback reçoit <code>(req, next)</code> : modifier <code>req.body</code>, appeler <code>next()</code> pour continuer ou <code>next(err)</code> pour annuler</li> <li><code>api.executeAction(action, params)</code> — exécute une action whitelistée. Retourne une <code>Promise</code></li> <li><code>api.getTableWriteHook(table, action)</code> — récupère un hook existant pour chaînage sans écrasement</li> </ul>',
+  '<p>Chaque module reçoit l''objet <code>api</code> en argument de <code>init(param, api)</code>. Il donne accès aux primitives du moteur sans exposer ses internes :</p> <ul> <li><code>api.app</code> — instance Express partagée. <code>app.locals</code> contient <code>tableHooks</code>, <code>jsHandlers</code> et <code>SESSION_TTL_S</code></li> <li><code>api.log</code> — logger avec méthodes <code>.INFO()</code>, <code>.WARN()</code>, <code>.ERROR()</code></li> <li><code>api.db.run(sql, params, cb)</code> / <code>.all()</code> / <code>.get()</code> — requêtes SQL paramétrées, protégées via placeholders <code>?</code></li> <li><code>api.renderPage(req, res, targetUrl?, extraData?)</code> — force le rendu d''une page DB via le pipeline <code>serve()</code> standard</li> <li><code>api.renderError(req, res, code, msg, nextUrl?)</code> — affiche une page d''erreur standard</li> <li><code>api.hooks.onPageLoad(name, callback)</code> — injecte des données avant le rendu EJS. La clé doit correspondre à <code>_item.HOOK</code></li> <li><code>api.hooks.onTableWrite(table, action, callback)</code> — intercepte INSERT/UPDATE/DELETE. Le callback reçoit <code>(req, next)</code> : modifier <code>req.body</code>, appeler <code>next()</code> pour continuer ou <code>next(err)</code> pour annuler</li> </ul>',
   202);
 INSERT INTO _glossary VALUES ('en', 'docs-07-p-wateapi',
-  '<p>Every module receives the <code>api</code> object as argument to <code>init(param, api)</code>. It provides access to engine primitives without exposing internals:</p> <ul> <li><code>api.app</code> — shared Express instance. <code>app.locals</code> holds <code>tableHooks</code>, <code>jsHandlers</code> and <code>SESSION_TTL_S</code></li> <li><code>api.log</code> — structured logger with <code>.INFO()</code>, <code>.WARN()</code>, <code>.ERROR()</code> methods</li> <li><code>api.db.run(sql, params, cb)</code> / <code>.all()</code> / <code>.get()</code> — parameterized SQL queries, safe from injection via <code>?</code> placeholders</li> <li><code>api.renderPage(req, res, targetUrl?, extraData?)</code> — forces a DB page render through the standard <code>serve()</code> pipeline</li> <li><code>api.renderError(req, res, code, msg, nextUrl?)</code> — renders a standard error page</li> <li><code>api.hooks.onPageLoad(name, callback)</code> — injects data before EJS render. The hook key must match <code>_item.HOOK</code></li> <li><code>api.hooks.onTableWrite(table, action, callback)</code> — intercepts INSERT/UPDATE/DELETE. Callback receives <code>(req, next)</code>: modify <code>req.body</code>, call <code>next()</code> to proceed or <code>next(err)</code> to abort</li> <li><code>api.executeAction(action, params)</code> — executes a whitelisted engine action. Returns a <code>Promise</code></li> <li><code>api.getTableWriteHook(table, action)</code> — retrieves existing hook for chaining without overwriting</li> </ul>',
+  '<p>Every module receives the <code>api</code> object as argument to <code>init(param, api)</code>. It provides access to engine primitives without exposing internals:</p> <ul> <li><code>api.app</code> — shared Express instance. <code>app.locals</code> holds <code>tableHooks</code>, <code>jsHandlers</code> and <code>SESSION_TTL_S</code></li> <li><code>api.log</code> — structured logger with <code>.INFO()</code>, <code>.WARN()</code>, <code>.ERROR()</code> methods</li> <li><code>api.db.run(sql, params, cb)</code> / <code>.all()</code> / <code>.get()</code> — parameterized SQL queries, safe from injection via <code>?</code> placeholders</li> <li><code>api.renderPage(req, res, targetUrl?, extraData?)</code> — forces a DB page render through the standard <code>serve()</code> pipeline</li> <li><code>api.renderError(req, res, code, msg, nextUrl?)</code> — renders a standard error page</li> <li><code>api.hooks.onPageLoad(name, callback)</code> — injects data before EJS render. The hook key must match <code>_item.HOOK</code></li> <li><code>api.hooks.onTableWrite(table, action, callback)</code> — intercepts INSERT/UPDATE/DELETE. Callback receives <code>(req, next)</code>: modify <code>req.body</code>, call <code>next()</code> to proceed or <code>next(err)</code> to abort</li> </ul>',
   202);
 
 -- 7.6 Créer un module applicatif
@@ -962,8 +964,8 @@ module.exports = {
   202);
 
 -- 7.7 Fonctions cœur : serve() et modify()
-INSERT INTO _glossary VALUES ('fr', 'docs-07-h-core', 'Fonctions cœur : serve() et modify()', 202);
-INSERT INTO _glossary VALUES ('en', 'docs-07-h-core', 'Core functions: serve() and modify()', 202);
+INSERT INTO _glossary VALUES ('fr', 'docs-07-h-core', 'Pipeline de rendu et d''écriture', 202);
+INSERT INTO _glossary VALUES ('en', 'docs-07-h-core', 'Render and write pipeline', 202);
 INSERT INTO _glossary VALUES ('fr', 'docs-07-p-core',
   '<p><code>serve(req, res, data?, urlOverride?)</code> — pipeline de rendu GET :</p> <ol> <li>Validation de la session</li> <li>Chargement des <code>_item</code> via UNION <code>_page</code>/<code>_item</code></li> <li>Exécution des requêtes SQL dans un sandbox VM (syntaxe <code>${expr:type}</code>)</li> <li>Fusion des résultats + chargement du glossaire scopé</li> <li>Exécution des hooks onPageLoad</li> <li>Rendu du template EJS</li> </ol> <p>Erreurs : <code>401</code> (session), <code>403</code> (accès), <code>404</code> (page), <code>500</code> (requête).</p> <p><code>modify(req, res, responder?)</code> — écriture INSERT/UPDATE/DELETE :</p> <ol> <li>Validation du nom de table (<code>/^[a-zA-Z0-9_]+$/</code>)</li> <li>Vérification de la session</li> <li>Vérification ACL via <code>_access</code></li> <li>Présence des colonnes PK pour UPDATE/DELETE</li> <li>Exécution du hook onTableWrite</li> <li>Écriture SQL</li> </ol> <p>Les opérations <code>-self</code> (update-self, delete-self) filtrent automatiquement sur la colonne <code>email</code> de la session. Utilisables directement par les modules applicatifs pour créer des routes personnalisées.</p>',
   202);

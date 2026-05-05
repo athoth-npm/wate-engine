@@ -3,10 +3,12 @@
  * \author    Romain Légault
  * \copyright 2023-2026 WATE Team.
  * \date      03/11/2023
- * \version   2.4.3
+ * \version   2.4.4
  * \brief     Fonctions d'accès aux données : pageData (lecture) et modify (écriture).
  *
- * \details   Préfixe '_' : module interne moteur, non destiné aux modules applicatifs.
+ * \details   v2.4.4 : Doxygen aligné sur signatures réelles — serve(req,res,data,urlOverride)
+ *                     et modify(req,res,responder). req.cookies.sid → req.cookies.session.
+ *                     Préfixe '_' : module interne moteur, non destiné aux modules applicatifs.
  *            Importé via require('./_data') depuis _auth.js, _db.js, et engine.js.
  *
  *            ── FORMAT DES QUERIES EN DB (tables _item, list_id applicatif) ──
@@ -254,12 +256,14 @@ function resolveParams(expr, type, sandbox) {
  * et req.body. Les valeurs non typées ou dépassant 500 caractères sont rejetées.
  *
  * @param {import('express').Request}  req - Requête Express. Doit contenir :
- *   req.cookies.sid  : identifiant de session (ou '0' pour anonyme),
- *   req.query.lang   : langue courante (ex: 'fr', 'en'),
- *   req.path         : URL de la page à servir.
+ *   req.cookies.session : cookie de session (ou absent pour anonyme),
+ *   req.query.lang      : langue courante (ex: 'fr', 'en'),
+ *   req.path            : URL de la page à servir.
  * @param {import('express').Response} res - Réponse Express.
  *   En cas d'erreur : res.status(401|403|404|500).
  *   En cas de succès : res.render() avec les données fusionnées.
+ * @param {Object} [data]     - Données additionnelles injectées (clé/valeur).
+ * @param {string} [urlOverride] - URL à servir à la place de req.path.
  *
  * @returns {void} Répond directement via @p res. Ne retourne pas de valeur.
  *
@@ -493,16 +497,14 @@ function serve(req, res, data, urlOverride) {
  * Les opérations '-self' (update-self, delete-self) filtrent automatiquement
  * sur la colonne 'email' de la session courante.
  *
- * @param {import('express').Request}  req    - Requête Express. Doit contenir :
- *   req.body         : données à écrire (colonnes → valeurs),
- *   req.cookies.sid  : identifiant de session,
- *   req.params.table : nom de la table cible.
- * @param {import('express').Response} res    - Réponse Express.
- *   Succès : res.json({ ok: true, lastID?, changes? }).
- *   Erreur  : res.status(400|401|403|500).json({ error: string }).
- * @param {string} table  - Nom de la table cible (validé contre /^[a-zA-Z0-9_]+$/).
- * @param {string} action - Opération : 'insert' | 'update' | 'update-self'
- *                                    | 'delete' | 'delete-self'.
+ * @param {import('express').Request}  req - Requête Express. Doit contenir :
+ *   req.body            : données à écrire (colonnes → valeurs),
+ *   req.cookies.session : cookie de session,
+ *   req.params.table    : nom de la table cible,
+ *   req.params.request  : 'insert' | 'update' | 'update-self' | 'delete' | 'delete-self'.
+ * @param {import('express').Response} res - Réponse Express.
+ * @param {Object} [responder] - Optionnel. { success(), error(code, msg) }.
+ *   Défaut : redirige vers ../data-<table>?lang=<lang>.
  *
  * @returns {void} Répond directement via @p res.
  *

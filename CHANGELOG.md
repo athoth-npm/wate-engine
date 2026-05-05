@@ -12,15 +12,23 @@ Versioned with [SemVer](https://semver.org/).
 - `doc/module.md` / `doc/module.fr.md` — Module creation guide: `_WATE_API` interface, `init()`/`done()`, hooks, `--mod`/`--ejs` syntax, full examples.
 - `doc/api.md` / `doc/api.fr.md` — Expanded `init()` options table. New sections: `serve()`, `modify()`, `_WATE_API`, module system.
 - `doc/architecture.md` / `doc/architecture.fr.md` — Added `_modules.js` to core table. Cross-links to module docs.
-- Web `/docs` page — 3 new subsections (7.5 Interface `_WATE_API`, 7.6 Creating a module, 7.7 Core functions `serve()`/`modify()`).
+- Web `/docs` page — 3 new subsections (7.5 Interface `_WATE_API`, 7.6 Creating a module, 7.7 Render and write pipeline).
 - Web `/docs` — HTML formatting: `<code>` (inline monospace), `<pre>` (dark blocks), `<ul>`/`<ol>` (bullets/numbers) across sections 4, 7, 11, 12, 13.
 
 ### Changed — Source documentation
 - `engine.js init()` — JSDoc with all options, return value, example.
 - `_data.js serve()` — Full JSDoc (pipeline, params, errors, changelog).
 - `_data.js modify()` — Full JSDoc (validation chain, params, `-self` operations).
-- `_modules.js _WATE_API` — `@typedef` with all 9 properties documented.
+- `_modules.js _WATE_API` — `@typedef` aligned with actual `_WATE_API` object.
 - `_modules.js load()` — Full JSDoc (params, validation, lifecycle, timeout).
+
+### Fixed — Documentation
+- `doc/api.md` / `doc/api.fr.md` — Removed `api.executeAction` and `api.getTableWriteHook` (not exposed by `_WATE_API`).
+- `doc/deploiement.md` / `doc/deploiement.fr.md` — Moved `007_apikey.sql` inside migration table; added module guide link.
+- `web/migrations/001_site.sql` — Section 7.5 `_WATE_API` aligned with actual code; 7.7 renamed to pipeline.
+- `_data.js` Doxygen — `serve()` and `modify()` signatures corrected.
+- `_modules.js` Doxygen — `load()` parameter names corrected.
+- `CHANGELOG.md` / `CHANGELOG.fr.md` — Section 7.7 name updated.
 
 ### Added — CI/CD
 - `.github/workflows/ci.yml` — Push/PR on main: Node 18/20/22 matrix, install, audit, test suite.

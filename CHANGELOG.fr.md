@@ -12,15 +12,23 @@ Versionné en [SemVer](https://semver.org/).
 - `doc/module.fr.md` / `doc/module.md` — Guide de création de modules : interface `_WATE_API`, `init()`/`done()`, hooks, syntaxe `--mod`/`--ejs`, exemples complets.
 - `doc/api.fr.md` / `doc/api.md` — Tableau des options `init()`. Nouvelles sections : `serve()`, `modify()`, `_WATE_API`, système de modules.
 - `doc/architecture.fr.md` / `doc/architecture.md` — `_modules.js` ajouté au noyau. Liens croisés vers la doc module.
-- Page web `/docs` — 3 nouvelles sous-sections (7.5 Interface `_WATE_API`, 7.6 Créer un module, 7.7 Fonctions cœur `serve()`/`modify()`).
+- Page web `/docs` — 3 nouvelles sous-sections (7.5 Interface `_WATE_API`, 7.6 Créer un module, 7.7 Pipeline de rendu et d''écriture).
 - Page web `/docs` — Formatage HTML : `<code>` (monospace inline), `<pre>` (blocs sombres), `<ul>`/`<ol>` (puces/numéros) sur les sections 4, 7, 11, 12, 13.
 
 ### Modifié — Documentation source
 - `engine.js init()` — JSDoc complet (options, retour, exemple).
 - `_data.js serve()` — JSDoc complet (pipeline, paramètres, erreurs, historique).
 - `_data.js modify()` — JSDoc complet (chaîne de validation, opérations `-self`).
-- `_modules.js _WATE_API` — `@typedef` documentant les 9 propriétés.
+- `_modules.js _WATE_API` — `@typedef` aligné sur l''objet `_WATE_API` réel.
 - `_modules.js load()` — JSDoc complet (paramètres, validation, cycle de vie, timeout).
+
+### Corrigé — Documentation
+- `doc/api.md` / `doc/api.fr.md` — Retrait de `api.executeAction` et `api.getTableWriteHook` (non exposés par `_WATE_API`).
+- `doc/deploiement.md` / `doc/deploiement.fr.md` — `007_apikey.sql` replacé dans le tableau des migrations ; lien module ajouté.
+- `web/migrations/001_site.sql` — Section 7.5 `_WATE_API` alignée sur le code ; 7.7 renommée « Pipeline de rendu et d''écriture ».
+- `_data.js` Doxygen — Signatures `serve()` et `modify()` corrigées.
+- `_modules.js` Doxygen — Noms des paramètres de `load()` corrigés.
+- `CHANGELOG.md` / `CHANGELOG.fr.md` — Nom de la section 7.7 mis à jour.
 
 ### Ajouté — CI/CD
 - `.github/workflows/ci.yml` — Push/PR sur main : matrice Node 18/20/22, install, audit, tests.
